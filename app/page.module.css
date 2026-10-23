@@ -21,7 +21,15 @@
 
 @media (max-width: 640px) {
   .Cardgrid {
+    gap: 24px;
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .Page {
+    padding-top: 40px;
+    gap: 24px;
   }
 }
 
@@ -34,12 +42,24 @@
   letter-spacing: -1px;
 }
 
+@media (max-width: 640px) {
+  .MainTitle {
+    font-size: 28px;
+  }
+}
+
 .Description {
   margin: 0;
   font-size: 17px;
   font-weight: 400;
   line-height: 1.8;
   color: #75646b;
+}
+
+@media (max-width: 640px) {
+  .Description {
+    font-size: 14px;
+  }
 }
 
 .Intro {

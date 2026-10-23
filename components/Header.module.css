@@ -12,6 +12,12 @@
   padding: 0 20px;
 }
 
+@media (max-width: 640px) {
+  .Headerinside {
+    height: 60px;
+  }
+}
+
 .Logo {
   font-size: 20px;
   color: #30252a;
