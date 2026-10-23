@@ -1,10 +1,10 @@
 "use client";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import Image from "next/image";
 import styles from "./ThemeButton.module.css";
 
 export default function ThemeButton() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       document.documentElement.setAttribute("data-theme", savedTheme);
