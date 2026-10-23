@@ -16,7 +16,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              {
+                const savedTheme = localStorage.getItem("theme");
+                if (savedTheme) {
+                  document.documentElement.setAttribute("data-theme", savedTheme);
+                }
+              }
+            `,
+          }}
+        ></script>
+      </head>
       <body className={notoSans.className}>
         <Header />
         {children}
