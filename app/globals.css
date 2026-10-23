@@ -1,3 +1,15 @@
+:root {
+  --text-primary: #30252a;
+  --text-muted: #75646b;
+  --accent-default: #b7233d;
+  --accent-subtle: #fff0f3;
+  --border-default: #eedce1;
+  --bg-default: #ffffff;
+  --bg-surface: #ffffff;
+  --text-on-accent: #ffffff;
+}
+
 body {
   margin: 0;
+  background-color: var(--bg-default);
 }
