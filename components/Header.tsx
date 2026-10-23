@@ -1,6 +1,7 @@
 import styles from "./Header.module.css";
 import Link from "next/link";
 import Image from "next/image";
+import ThemeButton from "@/components/ThemeButton";
 
 export default function Header() {
   return (
@@ -29,9 +30,7 @@ export default function Header() {
               />
             </a>
           </nav>
-          <button type="button" aria-label="테마 변경" className={styles.Moon}>
-            <Image src="/icons/moon.svg" alt="" width={18} height={18} />
-          </button>
+          <ThemeButton />
         </div>
       </div>
     </header>

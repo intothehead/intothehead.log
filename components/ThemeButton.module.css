@@ -1,0 +1,12 @@
+.Moon {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
