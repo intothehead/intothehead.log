@@ -41,6 +41,7 @@
 
 .Github {
   display: flex;
+  color: var(--text-primary);
 }
 
 .Headerbox {
