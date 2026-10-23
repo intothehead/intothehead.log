@@ -9,4 +9,5 @@
   background: none;
   padding: 0;
   cursor: pointer;
+  color: var(--text-primary);
 }
