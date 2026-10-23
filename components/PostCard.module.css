@@ -1,0 +1,73 @@
+.PostCard {
+  background-color: #fff;
+  border: 1px solid #eedce1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.Thumbnail {
+  background: #b7233d;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Blogname {
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -1px;
+}
+
+.Body {
+  padding: 18px 20px 20px 20px;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
+
+.Tags {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #b7233d;
+}
+
+.Tag {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #fff0f3;
+}
+
+.Title {
+  color: #30252a;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.Summary {
+  margin: 0;
+  color: #75646b;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.Date {
+  color: #75646b;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
