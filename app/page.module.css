@@ -5,6 +5,7 @@
   max-width: 1120px;
   margin: 0 auto;
   padding-top: 72px;
+  padding-bottom: 96px;
 }
 
 .Cardgrid {
@@ -34,4 +35,16 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.AllPosts {
+  color: #b7233d;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  align-self: center;
+  border: 1px solid #eedce1;
+  padding: 12px 24px;
+  text-decoration: none;
+  border-radius: 999px;
 }

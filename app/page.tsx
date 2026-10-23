@@ -1,6 +1,7 @@
 import PostCard from "@/components/PostCard";
 import { posts } from "@/data/posts";
 import styles from "./page.module.css";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -22,6 +23,9 @@ export default function Home() {
           />
         ))}
       </div>
+      <Link href="/posts" className={styles.AllPosts}>
+        전체 글 보기 →
+      </Link>
     </main>
   );
 }
