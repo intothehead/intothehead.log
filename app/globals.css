@@ -9,6 +9,16 @@
   --text-on-accent: #ffffff;
 }
 
+[data-theme="dark"] {
+  --text-primary: #f3ecee;
+  --text-muted: #a8979e;
+  --accent-default: #e83452;
+  --accent-subtle: #391821;
+  --border-default: #3a2e33;
+  --bg-default: #171214;
+  --bg-surface: #211a1d;
+}
+
 body {
   margin: 0;
   background-color: var(--bg-default);
