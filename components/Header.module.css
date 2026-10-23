@@ -1,0 +1,33 @@
+.Headeroutside {
+  border-bottom: 1px solid #eedce1;
+}
+
+.Headerinside {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  height: 72px;
+  align-items: center;
+}
+
+.Logo {
+  font-size: 20px;
+  color: #30252a;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+}
+
+.Log {
+  color: #b7233d;
+}
+
+.Headerallposts {
+  color: #30252a;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-decoration: none;
+}
