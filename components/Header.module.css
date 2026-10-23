@@ -31,3 +31,32 @@
   line-height: 1.5;
   text-decoration: none;
 }
+
+.Github {
+  display: flex;
+}
+
+.Moon {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--border-default, #eedce1);
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.Headerbox {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.Nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
