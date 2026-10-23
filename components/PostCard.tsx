@@ -4,9 +4,15 @@ type PostCardProps = {
   title: string;
   summary: string;
   date: string;
+  tags: string[];
 };
 
-export default function PostCard({ title, summary, date }: PostCardProps) {
+export default function PostCard({
+  title,
+  summary,
+  date,
+  tags,
+}: PostCardProps) {
   return (
     <article className={styles.PostCard}>
       <div className={styles.Thumbnail}>
@@ -14,8 +20,11 @@ export default function PostCard({ title, summary, date }: PostCardProps) {
       </div>
       <div className={styles.Body}>
         <div className={styles.Tags}>
-          <span className={styles.Tag}>React</span>
-          <span className={styles.Tag}>성능</span>
+          {tags.map((tag) => (
+            <span className={styles.Tag} key={tag}>
+              {tag}
+            </span>
+          ))}
         </div>
         <h2 className={styles.Title}>{title}</h2>
         <p className={styles.Summary}>{summary}</p>
