@@ -1,13 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import styles from "./ThemeButton.module.css";
 
 export default function ThemeButton() {
-  const [theme, setTheme] = useState("light");
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    }
+  }, []);
   function themeClick() {
-    const nextTheme = theme === "light" ? "dark" : "light";
-    setTheme(nextTheme);
+    const nowTheme = document.documentElement.getAttribute("data-theme");
+    const nextTheme = nowTheme === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", nextTheme);
     localStorage.setItem("theme", nextTheme);
   }
