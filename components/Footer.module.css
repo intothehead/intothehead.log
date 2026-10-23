@@ -8,10 +8,11 @@
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
+  padding: 0 20px;
 }
 
 .Footertext {
-  color: #75646B;
+  color: #75646b;
   margin: 0;
   font-size: 12px;
   font-weight: 500;
