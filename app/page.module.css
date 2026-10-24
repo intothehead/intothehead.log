@@ -79,3 +79,14 @@
   text-decoration: none;
   border-radius: 999px;
 }
+
+.Top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.gif {
+  image-rendering: pixelated;
+  margin-bottom: -40px;
+}
