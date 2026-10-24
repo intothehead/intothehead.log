@@ -1,7 +1,9 @@
 import styles from "./PostCard.module.css";
 import Link from "next/link";
+import Image from "next/image";
 
 type PostCardProps = {
+  thumbnail?: string;
   id: number;
   title: string;
   summary: string;
@@ -10,6 +12,7 @@ type PostCardProps = {
 };
 
 export default function PostCard({
+  thumbnail,
   id,
   title,
   summary,
@@ -19,9 +22,19 @@ export default function PostCard({
   return (
     <Link href={`/posts/${id}`} className={styles.PostCard}>
       <article>
-        <div className={styles.Thumbnail}>
-          <span className={styles.Blogname}>intothehead.log</span>
-        </div>
+        {thumbnail ? (
+          <Image
+            src={thumbnail}
+            alt=""
+            width={360}
+            height={200}
+            className={styles.ThumbnailImage}
+          />
+        ) : (
+          <div className={styles.Thumbnail}>
+            <span className={styles.Blogname}>intothehead.log</span>
+          </div>
+        )}
         <div className={styles.Body}>
           <div className={styles.Tags}>
             {tags.map((tag) => (

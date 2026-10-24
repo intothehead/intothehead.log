@@ -34,6 +34,7 @@ export default function Home() {
       <div className={styles.Cardgrid}>
         {posts.map((post) => (
           <PostCard
+            thumbnail={post.thumbnail}
             key={post.id}
             id={post.id}
             title={post.title}

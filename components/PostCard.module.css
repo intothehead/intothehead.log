@@ -72,3 +72,10 @@
   font-weight: 500;
   line-height: 1.4;
 }
+
+.ThumbnailImage {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
