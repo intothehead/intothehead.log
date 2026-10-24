@@ -62,5 +62,22 @@
 }
 
 .Content {
-    
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: var(--text-primary);
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.Content p {
+  margin: 0;
+}
+
+.Content h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.5px;
 }
