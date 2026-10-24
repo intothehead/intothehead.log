@@ -1,70 +1,63 @@
 export const info = {
-  tags: ["Browser", "CS"],
-  title: "브라우저는 HTML을 어떻게 화면에 그릴까",
+  tags: ["Network", "보안"],
+  title: "CORS 에러는 왜 생길까 — 같은 출처 정책과 프리플라이트",
   summary:
-    "DOM과 CSSOM, 렌더 트리, 레이아웃과 페인트까지 브라우저 렌더링 과정을 그림과 함께 정리합니다.",
+    "프론트엔드 개발 중 자주 만나는 CORS 에러가 왜 브라우저에서만 생기는지, 서버는 무엇을 허락해 줘야 하는지 정리합니다.",
   date: "2026.09.20",
 };
 
-주소창에 주소를 입력하면 브라우저는 HTML 글자를 받아 화면에 그립니다. 그 사이에 어떤 단계를 거치는지 알면, 페이지가 왜 늦게 뜨는지와 어떤 CSS가 화면을 느리게 만드는지 이해할 수 있습니다.
+프론트엔드에서 API를 처음 연결하면 콘솔에 "blocked by CORS policy"라는 빨간 글자를 자주 만납니다. 그런데 같은 주소를 Postman으로 부르면 잘 됩니다. 이 글에서는 CORS 에러가 왜 브라우저에서만 생기는지, 누가 무엇을 고쳐야 하는지 정리합니다.
 
-## 1. 전체 흐름
+## 1. 출처란 무엇일까
+
+출처(origin)는 주소의 **프로토콜, 호스트, 포트** 세 가지를 합친 것입니다. 셋 중 하나라도 다르면 다른 출처입니다.
 
 ```txt
-HTML  →  DOM   ─┐
-                ├→  렌더 트리  →  레이아웃  →  페인트  →  합성
-CSS   →  CSSOM ─┘
+https://blog.com/posts         기준
+https://blog.com/about         같은 출처 (경로만 다름)
+http://blog.com/posts          다른 출처 (프로토콜이 다름)
+https://api.blog.com/posts     다른 출처 (호스트가 다름)
+http://localhost:3000 과 http://localhost:8080   다른 출처 (포트가 다름)
 ```
 
-브라우저는 HTML과 CSS를 각각 읽어 나무 모양의 구조 두 개를 만들고, 둘을 합친 뒤 위치를 계산하고, 칠하고, 겹쳐서 화면에 내보냅니다.
+개발할 때 프론트는 3000번, 백엔드는 8080번 포트에서 띄우는 경우가 많아서, 같은 컴퓨터인데도 다른 출처가 됩니다.
 
-## 2. 파싱: DOM과 CSSOM, 그리고 막히는 지점
+## 2. 같은 출처 정책: 브라우저가 지키는 규칙
 
-브라우저는 HTML을 위에서부터 읽으며 태그를 부모와 자식 관계의 나무 모양으로 정리합니다. 이것이 DOM입니다. CSS도 같은 방식으로 읽어 어떤 요소에 어떤 스타일이 붙는지 정리하는데, 이것을 CSSOM이라고 합니다.
+브라우저는 기본적으로 다른 출처에서 받은 응답을 자바스크립트가 읽지 못하게 막습니다. 이것을 같은 출처 정책이라고 합니다. 만약 이 규칙이 없다면, 내가 방문한 나쁜 사이트의 자바스크립트가 내 로그인 정보를 실어 은행 사이트에 요청을 보내고 그 응답까지 읽어 갈 수 있습니다.
 
-이때 두 가지가 화면을 늦춥니다. 먼저 CSS는 다 읽기 전까지 화면을 그리지 않습니다. 스타일이 없는 화면이 잠깐 보이는 것을 막기 위해서입니다. 그리고 `defer`나 `async`가 없는 `script`를 만나면 HTML 읽기를 멈추고, 스크립트를 내려받아 실행한 뒤에야 다시 읽습니다.
+이 규칙은 **브라우저가 사용자를 지키려고** 하는 것입니다. 그래서 Postman이나 서버끼리 주고받는 요청에는 CORS가 없습니다. 그리고 많은 경우 요청은 서버에 실제로 도착하고 응답도 돌아오지만, 브라우저가 그 응답을 자바스크립트에 넘겨주지 않는 것입니다.
 
-```html
-<script src="app.js"></script>        <!-- HTML 읽기를 멈춘다 -->
-<script defer src="app.js"></script>  <!-- 끝까지 읽은 뒤 순서대로 실행 -->
-<script async src="ad.js"></script>   <!-- 받는 대로 실행, 순서 보장 없음 -->
+## 3. 서버가 허락해 주는 방법
+
+CORS(Cross-Origin Resource Sharing)는 서버가 "이 출처에는 읽어도 된다"고 허락하는 방법입니다. 브라우저는 요청에 `Origin` 헤더를 붙여 보내고, 서버가 응답에 허락하는 출처를 적어 주면 그때 응답을 넘겨줍니다.
+
+```txt
+요청 헤더
+Origin: http://localhost:3000
+
+응답 헤더
+Access-Control-Allow-Origin: http://localhost:3000
 ```
 
-그래서 페이지의 동작을 맡는 스크립트에는 보통 `defer`를 붙이고, 다른 코드와 상관없는 광고나 분석 스크립트에는 `async`를 붙입니다.
+그래서 CORS 에러를 고치는 곳은 프론트가 아니라 **서버**입니다. 쿠키를 함께 보내야 한다면 프론트에서 `credentials: "include"`를 주고, 서버는 `Access-Control-Allow-Credentials: true`를 보내야 합니다. 이때는 허락하는 출처를 `*`로 쓸 수 없고 정확한 주소를 적어야 합니다.
 
-## 3. 렌더 트리
+## 4. 프리플라이트: 보내기 전에 먼저 묻기
 
-DOM과 CSSOM을 합쳐 실제로 화면에 보일 요소만 모은 것이 렌더 트리입니다. `display: none`인 요소는 화면에 자리를 차지하지 않으므로 렌더 트리에서 빠집니다. 반면 `visibility: hidden`인 요소는 보이지 않을 뿐 자리는 차지하므로 남습니다.
+`PUT`이나 `DELETE` 요청, `Content-Type: application/json`, `Authorization` 같은 헤더가 붙은 요청은 서버의 데이터를 바꿀 수 있어서 더 조심합니다. 브라우저는 진짜 요청을 보내기 전에 `OPTIONS` 요청으로 먼저 허락을 구하는데, 이것을 프리플라이트라고 합니다.
 
-## 4. 레이아웃, 페인트, 합성
+```txt
+OPTIONS /posts
+Origin: http://localhost:3000
+Access-Control-Request-Method: PUT
+Access-Control-Request-Headers: content-type
 
-레이아웃 단계에서는 각 요소의 위치와 크기를 계산합니다. 페인트 단계에서는 글자, 색, 테두리, 그림자를 픽셀로 칠합니다. 마지막 합성 단계에서는 따로 칠한 층(레이어)을 순서대로 겹쳐 화면에 내보냅니다.
-
-```css
-.box {
-  width: 300px; /* 바뀌면 레이아웃부터 다시 */
-  color: red; /* 바뀌면 페인트부터 다시 */
-  transform: translateX(20px); /* 바뀌면 대부분 합성만 다시 */
-}
+204 No Content
+Access-Control-Allow-Origin: http://localhost:3000
+Access-Control-Allow-Methods: GET, POST, PUT
+Access-Control-Allow-Headers: content-type
 ```
 
-`width`처럼 크기나 위치를 바꾸는 속성은 레이아웃부터 다시 계산해서 가장 비쌉니다. 색만 바꾸면 페인트부터 다시 하고, `transform`과 `opacity`는 대부분 합성 단계만 다시 하므로 애니메이션에 쓰기 좋습니다.
+서버가 이 질문에 제대로 답하지 않으면 진짜 요청은 보내지지도 않습니다. 개발자 도구의 Network 탭에서 `OPTIONS` 요청이 실패했는지 보면 원인을 빨리 찾을 수 있습니다. 개발 중에는 Next.js의 rewrites로 요청을 같은 출처처럼 보이게 우회할 수도 있지만, 실제 서비스에서는 서버가 허락하도록 설정하는 것이 맞습니다.
 
-## 5. 자바스크립트로 레이아웃을 여러 번 일으키지 않기
-
-스타일을 바꾼 직후에 `offsetWidth`나 `getBoundingClientRect()`처럼 크기를 읽으면, 브라우저는 정확한 값을 주려고 레이아웃을 그 자리에서 다시 계산합니다. 반복문 안에서 쓰기와 읽기를 번갈아 하면 레이아웃이 매번 일어나 화면이 버벅입니다.
-
-```js
-// 나쁜 예: 읽기와 쓰기를 번갈아 해서 레이아웃이 반복된다
-boxes.forEach((box) => {
-  box.style.width = `${container.offsetWidth / 2}px`;
-});
-
-// 좋은 예: 먼저 한 번 읽고, 그다음에 모아서 쓴다
-const half = container.offsetWidth / 2;
-boxes.forEach((box) => {
-  box.style.width = `${half}px`;
-});
-```
-
-> 움직임은 `transform`으로 만들고, 크기를 읽는 일은 쓰기 전에 모아서 합니다.
+> CORS 에러는 브라우저가 사용자를 지키느라 내는 것이고, 고치는 열쇠는 서버가 쥐고 있습니다.
