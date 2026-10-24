@@ -42,4 +42,5 @@
   height: 16px;
   border-radius: 5px;
   background-color: var(--text-primary);
+  cursor: grab;
 }
