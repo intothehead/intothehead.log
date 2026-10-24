@@ -1,9 +1,10 @@
 "use client";
-import { motion, useMotionValue, useTransform } from "motion/react";
+import { motion, useMotionValue, useTransform, useAnimate } from "motion/react";
 import styles from "./Lamp.module.css";
 import { toggleTheme } from "@/lib/theme";
 
 export default function Lamp() {
+  const [swingRef, animate] = useAnimate();
   const handleY = useMotionValue(0);
   const cordScale = useTransform(handleY, (latest) => (110 + latest) / 110);
 
@@ -12,13 +13,18 @@ export default function Lamp() {
       <div className={styles.Cord} />
       <div className={styles.Shade} />
       <div className={styles.Light} />
-      <div className={styles.Pull}>
+      <div className={styles.Pull} ref={swingRef}>
         <motion.div className={styles.PullCord} style={{ scaleY: cordScale }} />
         <motion.div
           onDragEnd={(event, info) => {
             if (info.offset.y > 50) {
               toggleTheme();
             }
+            animate(
+              swingRef.current,
+              { rotate: [0, 10, -8, 5, -3, 0] },
+              { duration: 1.2 },
+            );
           }}
           className={styles.Handle}
           style={{ y: handleY }}
