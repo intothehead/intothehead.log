@@ -1,6 +1,7 @@
 "use client";
 import { motion, useMotionValue, useTransform } from "motion/react";
 import styles from "./Lamp.module.css";
+import { toggleTheme } from "@/lib/theme";
 
 export default function Lamp() {
   const handleY = useMotionValue(0);
@@ -13,6 +14,11 @@ export default function Lamp() {
       <div className={styles.Pull}>
         <motion.div className={styles.PullCord} style={{ scaleY: cordScale }} />
         <motion.div
+          onDragEnd={(event, info) => {
+            if (info.offset.y > 50) {
+              toggleTheme();
+            }
+          }}
           className={styles.Handle}
           style={{ y: handleY }}
           drag="y"
