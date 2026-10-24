@@ -1,0 +1,7 @@
+.PostRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 8px;
+  border-bottom: 1px solid var(--border-default);
+}

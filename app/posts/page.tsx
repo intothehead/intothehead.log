@@ -9,7 +9,7 @@ export default function AllPosts() {
         <h1 className={styles.MainTitle}>전체 글</h1>
         <p className={styles.PostCount}>총 {posts.length}개의 글</p>
       </div>
-      <ul>
+      <ul className={styles.PostList}>
         {posts.map((post) => (
           <PostRow
             key={post.id}
