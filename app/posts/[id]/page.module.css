@@ -116,7 +116,7 @@
 .Content pre {
   margin: 0;
   padding: 20px 24px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-code);
   border-radius: 10px;
   background-color: var(--bg-code);
   font-size: 14px;
@@ -164,4 +164,8 @@
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
+}
+
+.Content figure {
+  margin: 0;
 }

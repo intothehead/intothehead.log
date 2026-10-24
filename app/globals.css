@@ -7,7 +7,8 @@
   --bg-default: #ffffff;
   --bg-surface: #ffffff;
   --text-on-accent: #ffffff;
-  --bg-code: #fff7f9;
+  --bg-code: #24292e;
+  --border-code: #30363d;
 }
 
 [data-theme="dark"] {
@@ -18,7 +19,6 @@
   --border-default: #3a2e33;
   --bg-default: #171214;
   --bg-surface: #211a1d;
-  --bg-code: #1d1619;
 }
 
 body {
