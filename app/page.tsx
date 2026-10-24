@@ -6,6 +6,7 @@ import { getPosts } from "@/data/getPosts";
 
 export default async function Home() {
   const posts = await getPosts();
+  const recentPosts = posts.slice(0, 6);
   return (
     <main className={styles.Page}>
       <div className={styles.Top}>
@@ -33,7 +34,7 @@ export default async function Home() {
         />
       </div>
       <div className={styles.Cardgrid}>
-        {posts.map((post) => (
+        {recentPosts.map((post) => (
           <PostCard
             thumbnail={post.thumbnail}
             key={post.id}
