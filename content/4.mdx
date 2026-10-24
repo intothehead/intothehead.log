@@ -17,10 +17,11 @@ function first(items: any[]) {
   return items[0];
 }
 
-const value = first(["React", "Next.js"]); // value의 타입: any
+const tag = first(["React", "Next.js"]); // tag의 타입: any
+tag.toFixed(2); // 글자인데도 빨간 줄이 생기지 않는다
 ```
 
-`any`를 쓰면 어떤 배열이든 넣을 수 있지만, 꺼낸 값이 무엇인지 TypeScript가 알 수 없게 됩니다. 오타가 나도 빨간 줄이 생기지 않습니다.
+`any`를 쓰면 어떤 배열이든 넣을 수 있지만, 꺼낸 값이 무엇인지 TypeScript가 잊어버립니다. 글자에 숫자 메서드를 써도 막지 못해서, 실행해 봐야 오류를 알게 됩니다.
 
 ## 2. 타입을 매개변수처럼 받기
 
@@ -35,20 +36,40 @@ const tag = first(["React", "Next.js"]); // string | undefined
 const id = first([1, 2, 3]); // number | undefined
 ```
 
-함수를 부를 때 넣은 배열을 보고 TypeScript가 `T`를 알아서 채웁니다. 빈 배열일 수도 있으니 돌려주는 타입에 `undefined`를 함께 적었습니다.
+함수를 부를 때 넣은 배열을 보고 TypeScript가 `T`를 알아서 채웁니다. 이것을 타입 추론이라고 합니다. 빈 배열일 수도 있으니 돌려주는 타입에 `undefined`를 함께 적었습니다.
 
-## 3. 이미 쓰고 있던 제네릭
+## 3. extends로 빈칸에 조건 걸기
 
-알고 보니 제네릭은 이미 자주 쓰고 있었습니다.
+빈칸에 아무 타입이나 들어오면 안 될 때도 있습니다. 예를 들어 길이를 비교하는 함수라면 `length`가 있는 값만 받아야 합니다. 이럴 때 `extends`로 조건을 겁니다.
 
 ```ts
-const [selectedTag, setSelectedTag] = useState<string>("전체");
+function longer<T extends { length: number }>(a: T, b: T): T {
+  return a.length >= b.length ? a : b;
+}
 
-type PostDetailProps = {
-  params: Promise<{ id: string }>;
-};
+longer("React", "Vue"); // 글자에는 length가 있다
+longer([1, 2], [3]); // 배열에도 있다
+longer(10, 20); // 오류: 숫자에는 length가 없다
 ```
 
-`useState<string>`은 "이 state에는 글자가 들어간다", `Promise<{ id: string }>`는 "열면 id가 든 객체가 나오는 상자"라는 뜻입니다. 둘 다 빈칸 `T`에 실제 타입을 넣어 쓴 것입니다.
+`T extends { length: number }`는 "T에는 `length`가 숫자로 있어야 한다"는 뜻입니다. 조건을 걸어 두면 함수 안에서 `a.length`를 안심하고 쓸 수 있고, 조건에 맞지 않는 값은 부르는 순간 빨간 줄로 막힙니다.
+
+## 4. 타입에도 빈칸을 두기
+
+함수뿐 아니라 타입에도 빈칸을 둘 수 있습니다. 서버 응답처럼 겉모양은 같고 안에 든 데이터만 다를 때 유용합니다.
+
+```ts
+type ApiResponse<T> = {
+  data: T;
+  error: string | null;
+};
+
+type PostResponse = ApiResponse<Post>;
+type TagsResponse = ApiResponse<string[]>;
+```
+
+알고 보니 이미 자주 쓰던 것들도 모두 제네릭이었습니다. `useState<string>`은 "이 state에는 글자가 들어간다", `Promise<{ id: string }>`는 "열면 id가 든 객체가 나오는 상자"라는 뜻이고, `Post[]`는 `Array<Post>`를 짧게 쓴 것입니다.
+
+반대로 타입이 하나로 정해진 함수라면 굳이 제네릭을 쓸 필요가 없습니다. 빈칸은 여러 타입을 받아야 할 때만 만듭니다.
 
 > 제네릭은 타입 자리에 남겨 둔 빈칸이고, 쓰는 순간에 채워집니다.
