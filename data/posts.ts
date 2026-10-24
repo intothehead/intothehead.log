@@ -56,3 +56,9 @@ export const posts: Post[] = [
     date: "2026.09.14",
   },
 ];
+
+const firstTags = posts.map((post) => post.tags[0]);
+
+const pickSet = new Set(firstTags);
+
+export const pickTags = ["전체", ...pickSet];
