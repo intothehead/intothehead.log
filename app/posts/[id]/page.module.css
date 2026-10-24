@@ -115,7 +115,7 @@
 
 .Content pre {
   margin: 28px 0 0;
-  padding: 20px 24px;
+  padding: 20px 0;
   border: 1px solid var(--border-code);
   border-radius: 0 10px 10px 10px;
   background-color: var(--bg-code);
@@ -126,7 +126,7 @@
 
 @media (max-width: 640px) {
   .Content pre {
-    padding: 16px;
+    padding: 16px 0;
   }
 }
 
@@ -186,4 +186,19 @@
 
 .Content pre code {
   overflow-x: auto;
+  counter-reset: line;
+}
+
+.Content [data-line] {
+  padding-right: 24px;
+}
+
+.Content [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 24px;
+  margin-right: 24px;
+  text-align: right;
+  color: #6e7681;
 }
