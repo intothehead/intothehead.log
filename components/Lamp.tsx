@@ -3,8 +3,10 @@ import { motion, useMotionValue, useTransform, useAnimate } from "motion/react";
 import styles from "./Lamp.module.css";
 import { toggleTheme } from "@/lib/theme";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function Lamp() {
+  const [offPlay, setOffPlay] = useState(0);
   const [swingRef, animate] = useAnimate();
   const handleY = useMotionValue(0);
   const cordScale = useTransform(handleY, (latest) => (180 + latest) / 180);
@@ -13,7 +15,11 @@ export default function Lamp() {
     <div className={styles.Lamp} aria-hidden="true">
       <Image
         className={styles.LampOff}
-        src="/images/lamp/lamp_off.webp"
+        src={
+          offPlay === 0
+            ? "/images/lamp/lamp_off.png"
+            : `/images/lamp/lamp_off.webp?play=${offPlay}`
+        }
         alt=""
         width={322}
         height={338}
@@ -32,7 +38,10 @@ export default function Lamp() {
         <motion.div
           onDragEnd={(event, info) => {
             if (info.offset.y > 50) {
-              toggleTheme();
+              const nextTheme = toggleTheme();
+              if (nextTheme === "light") {
+                setOffPlay(offPlay + 1);
+              }
             }
             animate(
               swingRef.current,

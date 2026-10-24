@@ -3,4 +3,5 @@ export function toggleTheme() {
   const nextTheme = nowTheme === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", nextTheme);
   localStorage.setItem("theme", nextTheme);
+  return nextTheme;
 }
