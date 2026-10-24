@@ -2,6 +2,7 @@ import { posts } from "@/data/posts";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 import Image from "next/image";
+import Link from "next/link";
 
 type PostDetailProps = {
   params: Promise<{ id: string }>;
@@ -49,6 +50,11 @@ export default async function PostDetail({ params }: PostDetailProps) {
       )}
       <div className={styles.Content}>
         <PostBody />
+      </div>
+      <div className={styles.PostFooter}>
+        <Link href="/posts" className={styles.BackLink}>
+          ← 목록으로 돌아가기
+        </Link>
       </div>
     </main>
   );
