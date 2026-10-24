@@ -15,8 +15,16 @@ export default function Home() {
           </p>
         </div>
         <Image
-          className={styles.gif}
+          className={`${styles.gif} ${styles.Day}`}
           src="/images/day.gif"
+          alt=""
+          width={226}
+          height={212}
+          unoptimized
+        />
+        <Image
+          className={`${styles.gif} ${styles.Night}`}
+          src="/images/night.gif"
           alt=""
           width={226}
           height={212}

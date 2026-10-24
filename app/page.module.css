@@ -89,4 +89,9 @@
 .gif {
   image-rendering: pixelated;
   margin-bottom: -40px;
+  margin-right: 10px
 }
+
+.Night {display: none;}
+[data-theme="dark"] .Day {display: none;}
+[data-theme="dark"] .Night {display: block;}
