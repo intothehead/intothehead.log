@@ -9,7 +9,7 @@ export default function Lamp() {
   const cordScale = useTransform(handleY, (latest) => (110 + latest) / 110);
 
   return (
-    <div className={styles.Lamp}>
+    <div className={styles.Lamp} aria-hidden="true">
       <div className={styles.Cord} />
       <div className={styles.Shade} />
       <div className={styles.Light} />

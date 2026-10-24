@@ -62,3 +62,9 @@
 [data-theme="dark"] .Light {
   display: block;
 }
+
+@media (max-width: 768px) {
+  .Lamp {
+    display: none;
+  }
+}
