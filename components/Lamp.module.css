@@ -35,6 +35,7 @@
   width: 1px;
   height: 110px;
   background-color: var(--text-muted);
+  transform-origin: top;
 }
 
 .Handle {
