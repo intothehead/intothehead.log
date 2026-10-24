@@ -1,10 +1,11 @@
 import PostCard from "@/components/PostCard";
-import { posts } from "@/data/posts";
 import styles from "./page.module.css";
 import Link from "next/link";
 import Image from "next/image";
+import { getPosts } from "@/data/getPosts";
 
-export default function Home() {
+export default async function Home() {
+  const posts = await getPosts();
   return (
     <main className={styles.Page}>
       <div className={styles.Top}>
