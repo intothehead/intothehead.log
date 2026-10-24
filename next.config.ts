@@ -8,5 +8,10 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
 };
 
-const withMDX = createMDX({});
+const withMDX = createMDX({
+  options: {
+    rehypePlugins: [["rehype-pretty-code", { theme: "github-dark" }]],
+  },
+});
+
 export default withMDX(nextConfig);
