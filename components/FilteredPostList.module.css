@@ -23,3 +23,9 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.Selected {
+  background-color: var(--accent-default);
+  color: var(--text-on-accent);
+  border-color: var(--accent-default);
+}
