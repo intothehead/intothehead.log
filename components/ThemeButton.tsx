@@ -1,6 +1,7 @@
 "use client";
 import { useLayoutEffect } from "react";
 import styles from "./ThemeButton.module.css";
+import { toggleTheme } from "@/lib/theme";
 
 export default function ThemeButton() {
   useLayoutEffect(() => {
@@ -9,17 +10,11 @@ export default function ThemeButton() {
       document.documentElement.setAttribute("data-theme", savedTheme);
     }
   }, []);
-  function themeClick() {
-    const nowTheme = document.documentElement.getAttribute("data-theme");
-    const nextTheme = nowTheme === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", nextTheme);
-    localStorage.setItem("theme", nextTheme);
-  }
   return (
     <button
       type="button"
       aria-label="테마 변경"
-      onClick={themeClick}
+      onClick={toggleTheme}
       className={styles.Moon}
     >
       <svg
