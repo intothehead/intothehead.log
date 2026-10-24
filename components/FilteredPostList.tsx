@@ -6,6 +6,10 @@ import { useState } from "react";
 
 export default function FilteredPostList() {
   const [selectedTag, setSelectedTag] = useState("전체");
+  const filteredPosts =
+    selectedTag === "전체"
+      ? posts
+      : posts.filter((post) => post.tags[0] === selectedTag);
   return (
     <>
       <div className={styles.TagFilter}>
@@ -21,7 +25,7 @@ export default function FilteredPostList() {
         ))}
       </div>
       <ul className={styles.PostList}>
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <PostRow
             key={post.id}
             title={post.title}
