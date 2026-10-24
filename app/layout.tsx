@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from "next/font/google";
+import { JetBrains_Mono, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -7,6 +7,11 @@ import Header from "@/components/Header";
 const notoSans = Noto_Sans_KR({
   weight: ["400", "500", "700"],
   subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-code",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         ></script>
       </head>
-      <body className={notoSans.className}>
+      <body className={`${notoSans.className} ${jetbrainsMono.variable}`}>
         <Header />
         {children}
         <Footer />

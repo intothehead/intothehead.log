@@ -131,7 +131,7 @@
 }
 
 .Content code {
-  font-family: "Roboto Mono", monospace;
+  font-family: var(--font-code), monospace;
 }
 
 .Content blockquote {
