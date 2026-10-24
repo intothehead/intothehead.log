@@ -31,6 +31,9 @@ export default async function PostDetail({ params }: PostDetailProps) {
         <h1 className={styles.Title}>{post.title}</h1>
         <time className={styles.Date}>{post.date}</time>
       </div>
+      <div className={styles.Thumbnail}>
+        <span className={styles.Blogname}>intothehead.log</span>
+      </div>
     </main>
   );
 }
