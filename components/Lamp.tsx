@@ -7,7 +7,7 @@ import Image from "next/image";
 export default function Lamp() {
   const [swingRef, animate] = useAnimate();
   const handleY = useMotionValue(0);
-  const cordScale = useTransform(handleY, (latest) => (110 + latest) / 110);
+  const cordScale = useTransform(handleY, (latest) => (180 + latest) / 180);
 
   return (
     <div className={styles.Lamp} aria-hidden="true">
