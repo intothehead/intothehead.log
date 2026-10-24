@@ -1,5 +1,6 @@
 import { posts } from "@/data/posts";
 import { notFound } from "next/navigation";
+import styles from "./page.module.css";
 
 type PostDetailProps = {
   params: Promise<{ id: string }>;
@@ -18,8 +19,10 @@ export default async function PostDetail({ params }: PostDetailProps) {
   }
 
   return (
-    <main>
-      <h1>{post.title}</h1>
+    <main className={styles.Article}>
+      <div className={styles.PostHeader}>
+        <h1 className={styles.Title}>{post.title}</h1>
+      </div>
     </main>
   );
 }

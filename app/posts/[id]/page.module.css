@@ -1,0 +1,23 @@
+.Article {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 72px 20px 96px;
+}
+
+.PostHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.Title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -1px;
+}
