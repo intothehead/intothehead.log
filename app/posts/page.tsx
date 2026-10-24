@@ -1,6 +1,6 @@
 import PostRow from "@/components/PostRow";
 import styles from "./page.module.css";
-import { posts } from "@/data/posts";
+import { pickTags, posts } from "@/data/posts";
 
 export default function AllPosts() {
   return (
@@ -8,6 +8,13 @@ export default function AllPosts() {
       <div className={styles.PostTextBox}>
         <h1 className={styles.MainTitle}>전체 글</h1>
         <p className={styles.PostCount}>총 {posts.length}개의 글</p>
+      </div>
+      <div className={styles.TagFilter}>
+        {pickTags.map((tag) => (
+          <button key={tag} type="button" className={styles.TagButton}>
+            {tag}
+          </button>
+        ))}
       </div>
       <ul className={styles.PostList}>
         {posts.map((post) => (
