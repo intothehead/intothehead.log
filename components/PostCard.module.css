@@ -32,23 +32,23 @@
 .Tags {
   display: flex;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1.4;
   color: var(--accent-default);
 }
 
 .Tag {
-  padding: 3px 8px;
+  padding: 2px 8px;
   border-radius: 4px;
   background: var(--accent-subtle);
 }
 
 .Title {
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.375;
   letter-spacing: -0.3px;
   margin: 0;
 }
@@ -61,7 +61,7 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.6;
 }

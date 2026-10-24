@@ -85,14 +85,8 @@
   flex-direction: column;
   gap: 20px;
   color: var(--text-primary);
-  font-size: 17px;
-  line-height: 1.8;
-}
-
-@media (max-width: 640px) {
-  .Content {
-    font-size: 16px;
-  }
+  font-size: 16px;
+  line-height: 1.75;
 }
 
 .Content p {
@@ -115,19 +109,13 @@
 
 .Content pre {
   margin: 28px 0 0;
-  padding: 20px 0;
+  padding: 16px 0;
   border: 1px solid var(--border-code);
-  border-radius: 0 10px 10px 10px;
+  border-radius: 0 6px 6px 6px;
   background-color: var(--bg-code);
   font-size: 14px;
   line-height: 1.7;
   position: relative;
-}
-
-@media (max-width: 640px) {
-  .Content pre {
-    padding: 16px 0;
-  }
 }
 
 .Content code {
