@@ -1,4 +1,4 @@
-import styles from "./PostRow.module.css"
+import styles from "./PostRow.module.css";
 
 type PostRowProps = {
   title: string;
@@ -9,9 +9,9 @@ type PostRowProps = {
 export default function PostRow({ title, date, tag }: PostRowProps) {
   return (
     <li className={styles.PostRow}>
-      <time>{date}</time>
-      <span>{tag}</span>
-      <h2>{title}</h2>
+      <time className={styles.Date}>{date}</time>
+      <span className={styles.Tag}>{tag}</span>
+      <h2 className={styles.Title}>{title}</h2>
     </li>
   );
 }
