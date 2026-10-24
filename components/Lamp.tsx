@@ -1,5 +1,5 @@
 "use client";
-import { motion, useMotionValue, useTransform, useAnimate } from "motion/react";
+import { motion, useMotionValue, useTransform } from "motion/react";
 import styles from "./Lamp.module.css";
 import { toggleTheme } from "@/lib/theme";
 import Image from "next/image";
@@ -7,7 +7,6 @@ import { useState } from "react";
 
 export default function Lamp() {
   const [offPlay, setOffPlay] = useState(0);
-  const [swingRef, animate] = useAnimate();
   const handleY = useMotionValue(0);
   const cordScale = useTransform(handleY, (latest) => (180 + latest) / 180);
 
@@ -33,7 +32,7 @@ export default function Lamp() {
         height={338}
         unoptimized
       />
-      <div className={styles.Pull} ref={swingRef}>
+      <div className={styles.Pull}>
         <motion.div className={styles.PullCord} style={{ scaleY: cordScale }} />
         <motion.div
           onDragEnd={(event, info) => {
@@ -43,17 +42,13 @@ export default function Lamp() {
                 setOffPlay(offPlay + 1);
               }
             }
-            animate(
-              swingRef.current,
-              { rotate: [0, 10, -8, 5, -3, 0] },
-              { duration: 1.2 },
-            );
           }}
           className={styles.Handle}
           style={{ y: handleY }}
           drag="y"
           dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={0.5}
+          dragElastic={0.7}
+          dragTransition={{ bounceStiffness: 300, bounceDamping: 5 }}
         />
       </div>
     </div>
