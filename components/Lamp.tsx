@@ -11,6 +11,7 @@ export default function Lamp() {
     <div className={styles.Lamp}>
       <div className={styles.Cord} />
       <div className={styles.Shade} />
+      <div className={styles.Light} />
       <div className={styles.Pull}>
         <motion.div className={styles.PullCord} style={{ scaleY: cordScale }} />
         <motion.div

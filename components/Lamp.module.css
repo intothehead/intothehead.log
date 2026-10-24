@@ -45,3 +45,19 @@
   background-color: var(--text-primary);
   cursor: grab;
 }
+
+.Light {
+  display: none;
+  width: 180px;
+  height: 140px;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(255, 214, 102, 0.5),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+[data-theme="dark"] .Light {
+  display: block;
+}
