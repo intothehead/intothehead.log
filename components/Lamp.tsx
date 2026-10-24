@@ -1,14 +1,22 @@
 "use client";
-import { motion, useMotionValue, useTransform } from "motion/react";
+import { motion, useMotionValue, useTransform, animate } from "motion/react";
 import styles from "./Lamp.module.css";
 import { toggleTheme } from "@/lib/theme";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Lamp() {
   const [offPlay, setOffPlay] = useState(0);
   const handleY = useMotionValue(0);
   const cordScale = useTransform(handleY, (latest) => (180 + latest) / 180);
+  useEffect(() => {
+    const hint = animate(handleY, [0, 10, -3, 1, 0], {
+      duration: 0.6,
+      repeat: Infinity,
+      repeatDelay: 4,
+    });
+    return () => hint.stop();
+  }, [handleY]);
 
   return (
     <div className={styles.Lamp} aria-hidden="true">
