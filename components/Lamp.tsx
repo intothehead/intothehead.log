@@ -2,6 +2,7 @@
 import { motion, useMotionValue, useTransform, useAnimate } from "motion/react";
 import styles from "./Lamp.module.css";
 import { toggleTheme } from "@/lib/theme";
+import Image from "next/image";
 
 export default function Lamp() {
   const [swingRef, animate] = useAnimate();
@@ -10,9 +11,22 @@ export default function Lamp() {
 
   return (
     <div className={styles.Lamp} aria-hidden="true">
-      <div className={styles.Cord} />
-      <div className={styles.Shade} />
-      <div className={styles.Light} />
+      <Image
+        className={styles.LampOff}
+        src="/images/lamp/lamp_off.webp"
+        alt=""
+        width={322}
+        height={338}
+        unoptimized
+      />
+      <Image
+        className={styles.LampOn}
+        src="/images/lamp/lamp_on.webp"
+        alt=""
+        width={322}
+        height={338}
+        unoptimized
+      />
       <div className={styles.Pull} ref={swingRef}>
         <motion.div className={styles.PullCord} style={{ scaleY: cordScale }} />
         <motion.div
