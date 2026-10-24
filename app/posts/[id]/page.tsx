@@ -1,4 +1,4 @@
-import { posts } from "@/data/posts";
+import { getPosts } from "@/data/getPosts";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 import Image from "next/image";
@@ -8,12 +8,14 @@ type PostDetailProps = {
   params: Promise<{ id: string }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const posts = await getPosts();
   return posts.map((post) => ({ id: String(post.id) }));
 }
 
 export default async function PostDetail({ params }: PostDetailProps) {
   const { id } = await params;
+  const posts = await getPosts();
   const post = posts.find((item) => String(item.id) === id);
 
   if (!post) {
