@@ -3,12 +3,14 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import { getPosts } from "@/data/getPosts";
+import Lamp from "@/components/Lamp";
 
 export default async function Home() {
   const posts = await getPosts();
   const recentPosts = posts.slice(0, 6);
   return (
     <main className={styles.Page}>
+      <Lamp />
       <div className={styles.Top}>
         <div className={styles.Intro}>
           <h1 className={styles.MainTitle}>최근 글</h1>
