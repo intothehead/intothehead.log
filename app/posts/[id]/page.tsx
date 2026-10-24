@@ -18,6 +18,8 @@ export default async function PostDetail({ params }: PostDetailProps) {
     notFound();
   }
 
+  const { default: PostBody } = await import(`@/content/${id}.mdx`);
+
   return (
     <main className={styles.Article}>
       <div className={styles.PostHeader}>
@@ -33,6 +35,9 @@ export default async function PostDetail({ params }: PostDetailProps) {
       </div>
       <div className={styles.Thumbnail}>
         <span className={styles.Blogname}>intothehead.log</span>
+      </div>
+      <div className={styles.Content}>
+        <PostBody />
       </div>
     </main>
   );
