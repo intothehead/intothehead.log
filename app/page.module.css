@@ -89,9 +89,23 @@
 .gif {
   image-rendering: pixelated;
   margin-bottom: -40px;
-  margin-right: 10px
+  margin-right: 10px;
 }
 
-.Night {display: none;}
-[data-theme="dark"] .Day {display: none;}
-[data-theme="dark"] .Night {display: block;}
+@media (max-width: 640px) {
+  .gif {
+    width: 113px;
+    height: 106px;
+    margin-bottom: -24px;
+  }
+}
+
+.Night {
+  display: none;
+}
+[data-theme="dark"] .Day {
+  display: none;
+}
+[data-theme="dark"] .Night {
+  display: block;
+}
