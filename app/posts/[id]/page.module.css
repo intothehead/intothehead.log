@@ -114,14 +114,14 @@
 }
 
 .Content pre {
-  margin: 0;
+  margin: 28px 0 0;
   padding: 20px 24px;
   border: 1px solid var(--border-code);
-  border-radius: 10px;
+  border-radius: 0 10px 10px 10px;
   background-color: var(--bg-code);
   font-size: 14px;
   line-height: 1.7;
-  overflow-x: auto;
+  position: relative;
 }
 
 @media (max-width: 640px) {
@@ -168,4 +168,22 @@
 
 .Content figure {
   margin: 0;
+}
+
+.Content pre::before {
+  content: attr(data-language);
+  position: absolute;
+  bottom: 100%;
+  left: -1px;
+  padding: 2px 12px;
+  border: 1px solid var(--border-code);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background-color: var(--bg-code);
+  font-family: var(--font-code), monospace;
+  font-size: 12px;
+}
+
+.Content pre code {
+  overflow-x: auto;
 }
