@@ -1,10 +1,13 @@
-export type Post = {
+export type PostInfo = {
   thumbnail?: string;
-  id: number;
   title: string;
   summary: string;
   date: string;
   tags: string[];
+};
+
+export type Post = PostInfo & {
+  id: number;
 };
 
 export const posts: Post[] = [

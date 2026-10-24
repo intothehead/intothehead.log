@@ -1,3 +1,11 @@
+export const info = {
+  tags: ["TypeScript"],
+  title: "TypeScript 제네릭, 처음으로 이해한 날",
+  summary:
+    "타입을 매개변수처럼 쓴다는 말이 무슨 뜻인지, 직접 만든 유틸 함수로 하나씩 풀어 봅니다.",
+  date: "2026.09.28",
+};
+
 TypeScript를 쓰면서 `Promise<{ id: string }>`나 `useState<string>`처럼 꺾쇠가 붙은 타입을 자주 봤지만, 처음에는 그냥 외워서 썼습니다. 이 글에서는 제네릭이 무엇인지 직접 만든 작은 함수로 하나씩 풀어 봅니다.
 
 ## 1. 타입을 정하지 못하는 함수
