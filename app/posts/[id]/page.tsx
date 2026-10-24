@@ -1,6 +1,7 @@
 import { posts } from "@/data/posts";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
+import Image from "next/image";
 
 type PostDetailProps = {
   params: Promise<{ id: string }>;
@@ -33,9 +34,19 @@ export default async function PostDetail({ params }: PostDetailProps) {
         <h1 className={styles.Title}>{post.title}</h1>
         <time className={styles.Date}>{post.date}</time>
       </div>
-      <div className={styles.Thumbnail}>
-        <span className={styles.Blogname}>intothehead.log</span>
-      </div>
+      {post.thumbnail ? (
+        <Image
+          src={post.thumbnail}
+          alt=""
+          width={720}
+          height={360}
+          className={styles.ThumbnailImage}
+        />
+      ) : (
+        <div className={styles.Thumbnail}>
+          <span className={styles.Blogname}>intothehead.log</span>
+        </div>
+      )}
       <div className={styles.Content}>
         <PostBody />
       </div>

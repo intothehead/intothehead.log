@@ -1,4 +1,5 @@
 export type Post = {
+  thumbnail?: string;
   id: number;
   title: string;
   summary: string;
@@ -8,6 +9,7 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    thumbnail: "/images/day.png",
     id: 1,
     tags: ["React", "성능"],
     title: "React 렌더링 최적화 — memo와 useCallback은 언제 써야 할까",

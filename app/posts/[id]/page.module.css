@@ -103,3 +103,10 @@
   border-left: 3px solid var(--accent-default);
   color: var(--text-muted);
 }
+
+.ThumbnailImage {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 12px;
+}
