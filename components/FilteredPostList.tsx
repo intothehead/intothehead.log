@@ -1,10 +1,15 @@
 "use client";
 import PostRow from "@/components/PostRow";
 import styles from "./FilteredPostList.module.css";
-import { pickTags, posts } from "@/data/posts";
+import type { Post } from "@/data/posts";
 import { useState } from "react";
 
-export default function FilteredPostList() {
+type FilteredPostListProps = { posts: Post[] };
+
+export default function FilteredPostList({ posts }: FilteredPostListProps) {
+  const firstTags = posts.map((post) => post.tags[0]);
+  const pickSet = new Set(firstTags);
+  const pickTags = ["전체", ...pickSet];
   const [selectedTag, setSelectedTag] = useState("전체");
   const filteredPosts =
     selectedTag === "전체"
