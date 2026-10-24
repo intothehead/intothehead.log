@@ -1,0 +1,49 @@
+다크 모드를 처음 만들 때 가장 많이 하는 실수는 색을 "흰색", "검은색"처럼 값으로 기억하는 것입니다. 이 글에서는 색을 역할로 정리하고, 테마가 바뀔 때 그 역할의 값만 바꾸는 방식으로 다크 모드를 구현해 봅니다.
+
+## 1. 색을 역할별 변수로 정리하기
+
+배경, 본문 글자, 흐린 글자, 강조색처럼 화면에서 하는 역할을 기준으로 이름을 붙입니다. 이름이 정해지면 라이트와 다크에서 각각 어떤 값을 쓸지만 정하면 됩니다.
+
+```css
+:root {
+  --bg-default: #ffffff;
+  --text-primary: #30252a;
+  --accent-default: #b7233d;
+}
+
+[data-theme="dark"] {
+  --bg-default: #171214;
+  --text-primary: #f3ecee;
+  --accent-default: #e83452;
+}
+```
+
+> 테마 전환은 결국 "역할별 색을 통째로 바꾸는 것"입니다.
+
+이렇게 정리해 두면 새로운 화면을 만들 때도 색을 고민할 필요 없이 역할 이름만 고르면 됩니다.
+
+## 2. 버튼으로 테마 바꾸기
+
+`<html>` 태그의 `data-theme` 값을 바꾸면 위의 `[data-theme="dark"]` 규칙이 켜지고 꺼집니다. 고른 테마는 `localStorage`에 저장해 두고 다음 방문 때 다시 씁니다.
+
+```tsx
+function themeClick() {
+  const nowTheme = document.documentElement.getAttribute("data-theme");
+  const nextTheme = nowTheme === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", nextTheme);
+  localStorage.setItem("theme", nextTheme);
+}
+```
+
+## 3. 새로고침할 때 깜빡이지 않게 하기
+
+저장한 테마를 화면이 다 그려진 뒤에 적용하면, 잠깐 라이트 모드가 보였다가 다크 모드로 바뀌는 깜빡임이 생깁니다. 그래서 `<head>` 안의 작은 스크립트에서 화면을 그리기 전에 먼저 테마를 적용합니다.
+
+```js
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) {
+  document.documentElement.setAttribute("data-theme", savedTheme);
+}
+```
+
+이 스크립트는 서버가 만든 HTML에 없던 속성을 붙이기 때문에, `<html>` 태그에 `suppressHydrationWarning`을 함께 넣어 경고를 막았습니다.
