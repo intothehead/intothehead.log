@@ -12,6 +12,7 @@
   font-weight: 500;
   line-height: 1.5;
   margin: 0;
+  flex: 1;
 }
 
 .Date {
@@ -19,6 +20,7 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 1.6;
+  width: 96px;
 }
 
 .Tag {
@@ -29,4 +31,9 @@
   padding: 3px 8px;
   border-radius: 4px;
   background: var(--accent-subtle);
+}
+
+.TagCell {
+  width: 110px;
+  display: flex;
 }

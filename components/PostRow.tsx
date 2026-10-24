@@ -10,7 +10,9 @@ export default function PostRow({ title, date, tag }: PostRowProps) {
   return (
     <li className={styles.PostRow}>
       <time className={styles.Date}>{date}</time>
-      <span className={styles.Tag}>{tag}</span>
+      <div className={styles.TagCell}>
+        <span className={styles.Tag}>{tag}</span>
+      </div>
       <h2 className={styles.Title}>{title}</h2>
     </li>
   );
