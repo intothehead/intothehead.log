@@ -21,3 +21,25 @@
   line-height: 1.35;
   letter-spacing: -1px;
 }
+
+.Tags {
+  display: flex;
+  gap: 6px;
+}
+
+.Tag {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: var(--accent-subtle);
+  color: var(--accent-default);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.Date {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}

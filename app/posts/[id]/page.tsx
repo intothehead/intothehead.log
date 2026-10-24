@@ -21,7 +21,15 @@ export default async function PostDetail({ params }: PostDetailProps) {
   return (
     <main className={styles.Article}>
       <div className={styles.PostHeader}>
+        <div className={styles.Tags}>
+          {post.tags.map((tag) => (
+            <span key={tag} className={styles.Tag}>
+              {tag}
+            </span>
+          ))}
+        </div>
         <h1 className={styles.Title}>{post.title}</h1>
+        <time className={styles.Date}>{post.date}</time>
       </div>
     </main>
   );
