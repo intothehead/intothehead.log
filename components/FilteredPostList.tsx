@@ -28,6 +28,7 @@ export default function FilteredPostList() {
         {filteredPosts.map((post) => (
           <PostRow
             key={post.id}
+            id={post.id}
             title={post.title}
             date={post.date}
             tag={post.tags[0]}
