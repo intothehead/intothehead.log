@@ -35,6 +35,7 @@ export default function Home() {
         {posts.map((post) => (
           <PostCard
             key={post.id}
+            id={post.id}
             title={post.title}
             summary={post.summary}
             date={post.date}
