@@ -22,19 +22,21 @@ export default function PostCard({
   return (
     <Link href={`/posts/${id}`} className={styles.PostCard}>
       <article>
-        {thumbnail ? (
-          <Image
-            src={thumbnail}
-            alt=""
-            width={360}
-            height={200}
-            className={styles.ThumbnailImage}
-          />
-        ) : (
-          <div className={styles.Thumbnail}>
-            <span className={styles.Blogname}>intothehead.log</span>
-          </div>
-        )}
+        <div className={styles.ThumbnailBox}>
+          {thumbnail ? (
+            <Image
+              src={thumbnail}
+              alt=""
+              width={360}
+              height={200}
+              className={styles.ThumbnailImage}
+            />
+          ) : (
+            <div className={styles.Thumbnail}>
+              <span className={styles.Blogname}>intothehead.log</span>
+            </div>
+          )}
+        </div>
         <div className={styles.Body}>
           <div className={styles.Tags}>
             {tags.map((tag) => (
