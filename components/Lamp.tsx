@@ -32,6 +32,7 @@ export default function Lamp() {
         width={322}
         height={338}
         unoptimized
+        loading="eager"
       />
       <Image
         className={styles.LampOn}
@@ -40,6 +41,7 @@ export default function Lamp() {
         width={322}
         height={338}
         unoptimized
+        loading="eager"
       />
       <div className={styles.Pull}>
         <motion.div className={styles.PullCord} style={{ scaleY: cordScale }} />

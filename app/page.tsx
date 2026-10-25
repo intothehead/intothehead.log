@@ -20,19 +20,21 @@ export default async function Home() {
         </div>
         <Image
           className={`${styles.gif} ${styles.Day}`}
-          src="/images/day.gif"
+          src="/images/day.webp"
           alt=""
           width={226}
           height={212}
           unoptimized
+          loading="eager"
         />
         <Image
           className={`${styles.gif} ${styles.Night}`}
-          src="/images/night.gif"
+          src="/images/night.webp"
           alt=""
           width={226}
           height={212}
           unoptimized
+          loading="eager"
         />
       </div>
       <div className={styles.Cardgrid}>
