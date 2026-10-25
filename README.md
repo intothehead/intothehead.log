@@ -58,7 +58,7 @@
      summary: "목록에 보일 요약",
      date: "2026.10.25",
      tags: ["React", "성능"],
-     thumbnail: "/images/파일이름.png", // 없어도 됩니다
+     thumbnail: "/images/posts/주소이름/thumbnail.png", // 없어도 됩니다
    };
 
    본문은 여기부터 마크다운으로 씁니다.
@@ -66,7 +66,15 @@
 
    - `date`는 `YYYY.MM.DD` 형식(월·일 두 자리)으로 씁니다. 이 값으로 최신 글부터 정렬합니다.
    - `tags`의 첫 번째가 대표 태그입니다. 전체 글의 필터와 목록에 보입니다.
-   - `thumbnail`을 쓰면 그림 파일을 `public/images`에 넣습니다.
+   - 그림은 글마다 `public/images/posts/주소이름/` 폴더를 만들어 넣습니다. 그림이 하나뿐이어도 폴더를 만듭니다.
+
+     ```
+     public/images/posts/cors/thumbnail.png
+     public/images/posts/cors/preflight.png
+     ```
+
+   - 썸네일은 `thumbnail: "/images/posts/cors/thumbnail.png"`처럼 적습니다.
+   - 본문 그림은 마크다운으로 넣습니다: `![그림 설명](/images/posts/cors/preflight.png)`
 
 ## 폴더 구조
 
@@ -76,5 +84,5 @@ components/     카드, 목록 줄, 태그 필터, 전등, 테마 버튼, 댓글
 content/        글 MDX 파일 (주소이름.mdx = /posts/주소이름)
 data/           글 타입(posts.ts), content 폴더를 읽어 글 목록을 만드는 getPosts.ts
 lib/            테마 바꾸기 함수
-public/images/  도트 그림, 전등 그림
+public/images/  도트 그림, 전등 그림, 글 그림(posts/주소이름/)
 ```
