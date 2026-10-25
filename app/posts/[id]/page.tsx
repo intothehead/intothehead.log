@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import styles from "./page.module.css";
 import Image from "next/image";
 import Link from "next/link";
+import Comments from "@/components/Comments";
 
 type PostDetailProps = {
   params: Promise<{ id: string }>;
@@ -58,6 +59,7 @@ export default async function PostDetail({ params }: PostDetailProps) {
           ← 목록으로 돌아가기
         </Link>
       </div>
+      <Comments />
     </main>
   );
 }
