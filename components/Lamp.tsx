@@ -4,8 +4,15 @@ import styles from "./Lamp.module.css";
 import { toggleTheme } from "@/lib/theme";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { preload } from "react-dom";
 
 export default function Lamp() {
+  preload("/images/lamp/lamp_off.png", { as: "image", fetchPriority: "high" });
+  preload("/images/lamp/pull_cord.png", { as: "image", fetchPriority: "high" });
+  preload("/images/lamp/pull_handle.png", {
+    as: "image",
+    fetchPriority: "high",
+  });
   const [offPlay, setOffPlay] = useState(0);
   const handleY = useMotionValue(0);
   const cordScale = useTransform(handleY, (latest) => (180 + latest) / 180);
