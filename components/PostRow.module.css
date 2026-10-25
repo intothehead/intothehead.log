@@ -5,6 +5,11 @@
   padding: 18px 12px;
   border-bottom: 1px solid var(--border-default);
   text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.PostRow:hover {
+  background-color: var(--bg-hover);
 }
 
 @media (max-width: 640px) {
