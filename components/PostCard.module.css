@@ -93,3 +93,8 @@
 .Thumbnail {
   transition: transform 0.5s;
 }
+
+.PostCard:hover .ThumbnailImage,
+.PostCard:hover .Thumbnail {
+  transform: scale(1.05);
+}
