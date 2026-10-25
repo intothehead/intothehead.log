@@ -20,6 +20,8 @@ export default function FilteredPostList({ posts }: FilteredPostListProps) {
   const start = (page - 1) * postsPerPage;
   const end = page * postsPerPage;
   const pagePosts = filteredPosts.slice(start, end);
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
   return (
     <>
       <div className={styles.TagFilter}>
@@ -45,6 +47,11 @@ export default function FilteredPostList({ posts }: FilteredPostListProps) {
           />
         ))}
       </ul>
+      <div className={styles.Pagination}>
+        <span>
+          {page} / {totalPages}
+        </span>
+      </div>
     </>
   );
 }
