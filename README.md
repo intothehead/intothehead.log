@@ -47,7 +47,9 @@
 
 ## 글 올리는 법
 
-1. `content` 폴더에 다음 번호로 `N.mdx` 파일을 만듭니다. 번호가 글 주소가 됩니다(`/posts/N`).
+1. `content` 폴더에 `주소이름.mdx` 파일을 만듭니다. 파일 이름이 그대로 글 주소가 됩니다(`react-memo-usecallback.mdx` → `/posts/react-memo-usecallback`).
+   - 파일 이름은 영어 소문자, 숫자, 하이픈(`-`)으로만 짓습니다. 한글이나 띄어쓰기는 주소에서 깨져 보입니다.
+   - 이미 올린 글의 파일 이름을 바꾸면 주소가 바뀌어서, 그 글에 달린 댓글이 새 주소에 보이지 않습니다.
 2. 맨 위에 글 정보를 적고, 빈 줄 다음부터 본문을 마크다운으로 씁니다.
 
    ```mdx
@@ -71,7 +73,7 @@
 ```
 app/            페이지(Home, 전체 글, 글 상세, 404)와 전체 레이아웃
 components/     카드, 목록 줄, 태그 필터, 전등, 테마 버튼, 댓글
-content/        글 MDX 파일 (N.mdx = /posts/N)
+content/        글 MDX 파일 (주소이름.mdx = /posts/주소이름)
 data/           글 타입(posts.ts), content 폴더를 읽어 글 목록을 만드는 getPosts.ts
 lib/            테마 바꾸기 함수
 public/images/  도트 그림, 전등 그림

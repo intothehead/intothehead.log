@@ -7,6 +7,6 @@ export type PostInfo = {
 };
 
 export type Post = PostInfo & {
-  id: number;
+  id: string;
 };
 

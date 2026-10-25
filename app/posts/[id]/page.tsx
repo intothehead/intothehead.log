@@ -11,13 +11,13 @@ type PostDetailProps = {
 
 export async function generateStaticParams() {
   const posts = await getPosts();
-  return posts.map((post) => ({ id: String(post.id) }));
+  return posts.map((post) => ({ id: post.id }));
 }
 
 export default async function PostDetail({ params }: PostDetailProps) {
   const { id } = await params;
   const posts = await getPosts();
-  const post = posts.find((item) => String(item.id) === id);
+  const post = posts.find((item) => item.id === id);
 
   if (!post) {
     notFound();

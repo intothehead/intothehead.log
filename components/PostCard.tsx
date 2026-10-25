@@ -4,7 +4,7 @@ import Image from "next/image";
 
 type PostCardProps = {
   thumbnail?: string;
-  id: number;
+  id: string;
   title: string;
   summary: string;
   date: string;

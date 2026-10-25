@@ -2,7 +2,7 @@ import styles from "./PostRow.module.css";
 import Link from "next/link";
 
 type PostRowProps = {
-  id: number;
+  id: string;
   title: string;
   date: string;
   tag: string;
