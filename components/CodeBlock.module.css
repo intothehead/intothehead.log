@@ -1,0 +1,17 @@
+.CopyButton {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-code), monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  cursor: pointer;
+}
+
+.CopyButton:hover {
+  color: var(--text-primary);
+}
