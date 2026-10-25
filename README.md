@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# intothehead.log
 
-## Getting Started
+프론트엔드를 공부하며 배운 것을 기록하는 개인 블로그입니다.
 
-First, run the development server:
+- 사이트: https://intothehead.vercel.app
+- 댓글: GitHub Discussions 기반 [giscus](https://giscus.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 기술 스택
+
+| 구분       | 사용                                                              |
+| ---------- | ----------------------------------------------------------------- |
+| 프레임워크 | Next.js 16 (App Router, Cache Components, React Compiler)         |
+| 언어       | TypeScript                                                        |
+| UI         | React 19                                                          |
+| 스타일     | CSS Modules, CSS 변수로 라이트·다크 테마                          |
+| 글         | MDX (`@next/mdx`), 코드 문법 강조 (`rehype-pretty-code`, `shiki`) |
+| 애니메이션 | Motion (`motion`)                                                 |
+| 댓글       | giscus (`@giscus/react`)                                          |
+| 글꼴       | `next/font`: Noto Sans KR, JetBrains Mono(코드)                   |
+| 배포       | Vercel (`main`에 push하면 자동 배포)                              |
+
+## 주요 기능
+
+### Home (`/`)
+
+- 최근 글 6개를 카드로 보여 줍니다. 화면 너비에 따라 3열, 2열(1024px 이하), 1열(640px 이하)로 바뀝니다.
+- 카드에 마우스를 올리면 카드가 살짝 뜨고 썸네일이 커집니다. 글 길이와 상관없이 날짜는 카드 맨 아래에 맞춥니다.
+- 전등 손잡이를 아래로 당기면 라이트·다크 테마가 바뀝니다. 손잡이가 가끔 혼자 튕겨서 당길 수 있다는 걸 알려 줍니다(768px 이하에서는 숨김).
+- 테마에 따라 낮·밤 도트 그림이 바뀝니다.
+
+### 전체 글 (`/posts`)
+
+- 글마다 첫 번째 태그를 모아 필터 버튼을 자동으로 만들고, 고른 태그의 글만 보여 줍니다.
+- 한 페이지에 8개씩 나누고 이전·다음 버튼으로 넘깁니다. 태그를 바꾸면 1페이지로 돌아가고, 페이지가 하나뿐이면 버튼을 숨깁니다.
+
+### 글 상세 (`/posts/[id]`)
+
+- MDX로 쓴 본문을 보여 줍니다. 코드 상자에는 언어 탭, 줄 번호, 문법 강조가 있습니다.
+- 글 정보에 썸네일이 있으면 그 그림을, 없으면 기본 썸네일을 보여 줍니다.
+- 맨 아래에 giscus 댓글이 있습니다. 사이트 테마를 바꾸면 댓글 창 색도 바로 따라 바뀝니다.
+- 없는 글 주소로 들어오면 404 페이지를 보여 줍니다.
+
+### 공통
+
+- 고른 테마를 `localStorage`에 저장하고, 화면을 그리기 전에 `<head>`의 인라인 스크립트로 적용해 깜빡임을 막습니다. Header의 달 버튼으로도 테마를 바꿀 수 있습니다.
+- 처음 보이는 그림은 미리 받고, 도트 그림은 GIF 대신 WebP를 써서 첫 화면을 빠르게 띄웁니다.
+
+## 글 올리는 법
+
+1. `content` 폴더에 다음 번호로 `N.mdx` 파일을 만듭니다. 번호가 글 주소가 됩니다(`/posts/N`).
+2. 맨 위에 글 정보를 적고, 빈 줄 다음부터 본문을 마크다운으로 씁니다.
+
+   ```mdx
+   export const info = {
+     title: "글 제목",
+     summary: "목록에 보일 요약",
+     date: "2026.10.25",
+     tags: ["React", "성능"],
+     thumbnail: "/images/파일이름.png", // 없어도 됩니다
+   };
+
+   본문은 여기부터 마크다운으로 씁니다.
+   ```
+
+   - `date`는 `YYYY.MM.DD` 형식(월·일 두 자리)으로 씁니다. 이 값으로 최신 글부터 정렬합니다.
+   - `tags`의 첫 번째가 대표 태그입니다. 전체 글의 필터와 목록에 보입니다.
+   - `thumbnail`을 쓰면 그림 파일을 `public/images`에 넣습니다.
+
+## 폴더 구조
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+app/            페이지(Home, 전체 글, 글 상세, 404)와 전체 레이아웃
+components/     카드, 목록 줄, 태그 필터, 전등, 테마 버튼, 댓글
+content/        글 MDX 파일 (N.mdx = /posts/N)
+data/           글 타입(posts.ts), content 폴더를 읽어 글 목록을 만드는 getPosts.ts
+lib/            테마 바꾸기 함수
+public/images/  도트 그림, 전등 그림
+```
