@@ -30,7 +30,10 @@ export default function FilteredPostList({ posts }: FilteredPostListProps) {
             key={tag}
             type="button"
             className={`${styles.TagButton} ${selectedTag === tag ? styles.Selected : ""}`}
-            onClick={() => setSelectedTag(tag)}
+            onClick={() => {
+              setSelectedTag(tag);
+              setPage(1);
+            }}
           >
             {tag}
           </button>
