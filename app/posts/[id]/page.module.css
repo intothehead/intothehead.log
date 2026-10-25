@@ -198,3 +198,8 @@
   color: var(--accent-default);
   font-size: 0.9em;
 }
+
+.Content img {
+  display: block;
+  max-width: 100%;
+}
