@@ -1,7 +1,24 @@
 "use client";
 import Giscus from "@giscus/react";
+import { useSyncExternalStore } from "react";
+
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true });
+  return () => observer.disconnect();
+}
+
+function getTheme() {
+  const nowTheme = document.documentElement.getAttribute("data-theme");
+  return nowTheme === "dark" ? "transparent_dark" : "light";
+}
+
+function getServerTheme() {
+  return "light";
+}
 
 export default function Comments() {
+  const theme = useSyncExternalStore(subscribe, getTheme, getServerTheme);
   return (
     <Giscus
       repo="intothehead/intothehead.log"
@@ -15,6 +32,7 @@ export default function Comments() {
       inputPosition="top"
       lang="ko"
       loading="lazy"
+      theme={theme}
     />
   );
 }
