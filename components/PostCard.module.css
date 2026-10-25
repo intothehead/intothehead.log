@@ -4,6 +4,11 @@
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
+  transition: transform 0.3s;
+}
+
+.PostCard:hover {
+  transform: translateY(-4px);
 }
 
 .Thumbnail {

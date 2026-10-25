@@ -9,6 +9,7 @@ export default function Lamp() {
   const [offPlay, setOffPlay] = useState(0);
   const handleY = useMotionValue(0);
   const cordScale = useTransform(handleY, (latest) => (180 + latest) / 180);
+
   useEffect(() => {
     const hint = animate(handleY, [0, 10, -3, 1, 0], {
       duration: 0.6,
