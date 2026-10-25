@@ -50,25 +50,27 @@ export default function FilteredPostList({ posts }: FilteredPostListProps) {
           />
         ))}
       </ul>
-      <div className={styles.Pagination}>
-        <button
-          type="button"
-          onClick={() => setPage(page - 1)}
-          disabled={page === 1}
-        >
-          ‹
-        </button>
-        <span>
-          {page} / {totalPages}
-        </span>
-        <button
-          type="button"
-          onClick={() => setPage(page + 1)}
-          disabled={page === totalPages}
-        >
-          ›
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className={styles.Pagination}>
+          <button
+            type="button"
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
+          >
+            ‹
+          </button>
+          <span>
+            {page} / {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage(page + 1)}
+            disabled={page === totalPages}
+          >
+            ›
+          </button>
+        </div>
+      )}
     </>
   );
 }
