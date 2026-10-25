@@ -9,9 +9,22 @@
   background-color: var(--bg-code);
   color: #8b949e;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+pre:hover .CopyButton,
+.CopyButton:focus-visible {
+  opacity: 1;
 }
 
 .CopyButton:hover {
   color: #e1e4e8;
   background-color: #30363d;
+}
+
+@media (hover: none) {
+  .CopyButton {
+    opacity: 1;
+  }
 }
