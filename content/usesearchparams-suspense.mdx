@@ -1,0 +1,111 @@
+export const info = {
+  tags: ["Next.js", "성능"],
+  title: "useSearchParams 한 줄이 페이지 전체를 스켈레톤으로 만든 이유",
+  summary:
+    "공통 헤더의 useSearchParams 때문에 페이지 전체가 브라우저 렌더링으로 넘어간 원인을 찾고, Suspense 경계·폰트 분할·LCP 이미지 우선 로드로 모바일 홈 FCP를 11.6초에서 3.3초로 줄인 과정을 정리합니다.",
+  date: "2026.10.27",
+};
+
+팀 프로젝트로 만든 Next.js 서비스를 배포한 뒤, 모바일에서 첫 화면이 유독 늦게 뜨는 문제를 발견했습니다. 가장 큰 원인은 공통 헤더에 들어 있던 `useSearchParams` 한 줄이었습니다. 이 글에서는 원인을 찾고 고친 과정과 함께 진행한 폰트·이미지 최적화, 전체 측정 결과를 정리합니다.
+
+## 1. 가장 큰 문제점
+
+배포 후 모바일 홈의 FCP가 11.6초로 비정상적으로 높은 것을 발견했습니다. 서버가 보낸 첫 HTML에는 본문 없이 로딩 스켈레톤만 나오는 현상이 있었습니다.
+
+## 2. 원인
+
+우선, 웹페이지가 화면에 뜨는 순서를 알아야 합니다. 서버가 HTML을 보내면 브라우저는 받자마자 화면을 그리고, 그다음 JS를 내려받아 실행합니다. Next.js는 이 HTML을 빌드할 때 미리 만들어 두는데 이를 프리렌더링이라고 합니다. 그래서 사용자는 JS를 기다리지 않고 내용을 바로 볼 수 있습니다. 미리 만들어 두는 방식은 [CSR, SSR, SSG 글](/posts/csr-ssr-ssg)에서 다룬 SSG와 같습니다.
+
+여기서 주목해야 하는 건 프리렌더링인데, 공통 헤더의 로그인 링크는 사용자가 로그인 후 보던 화면으로 돌아오도록 `useSearchParams`로 현재 주소의 쿼리를 읽습니다. 빌드할 때는 요청이 없으니 쿼리 값을 알 수 없고, 이럴 때 Next.js는 `useSearchParams`를 쓴 컴포넌트를 감싸고 있는 가장 가까운 `Suspense`를 찾아, 그 `Suspense` 안쪽 전체를 미리 만들지 않고 브라우저가 그리게 넘깁니다. 이 프로젝트에서는 헤더 위에 루트 `loading.tsx` 경계밖에 없어서 페이지 전체가 브라우저 렌더링으로 넘어갔고, 사용자는 JS를 받아 실행할 때까지 스켈레톤만 보게 되는 현상이 생기게 되었습니다.
+
+## 3. 늦게 발견한 이유
+
+경계가 아예 없었다면 빌드할 때 `Missing Suspense boundary` 오류가 났을 건데, 루트 `loading.tsx`가 경계 역할을 해서 오류 없이 통과했습니다. 개발 서버(`next dev`)에서도 이 현상이 드러나지 않아 배포 후에야 발견하게 된 것입니다.
+
+## 4. 해결
+
+> 문제가 되는 공통 헤더의 로그인 링크만 `Suspense`로 감싸, 브라우저가 그리는 범위를 로그인 링크 자리로 좁혔습니다. 나머지 헤더와 본문은 다시 빌드 때 HTML로 만들어지게 하였습니다.
+
+```tsx
+export function HeaderAuthLink() {
+  return (
+    <Suspense fallback={null}>
+      <HeaderAuthLinkContent />
+    </Suspense>
+  );
+}
+
+// 원래 HeaderAuthLink 본문을 이름만 바꿔 옮김
+function HeaderAuthLinkContent() {
+  const searchParams = useSearchParams(); // 이제 가장 가까운 경계는 바로 위 Suspense
+  // ...
+}
+```
+
+## 5. 폰트 최적화
+
+부가적으로 폰트와 이미지 로딩 최적화도 진행하였습니다.
+
+모든 화면이 첫 로드 때 Pretendard 폰트 파일 하나(2.0MB)를 통째로 받고 있었고, 한 화면에 실제로 쓰이는 글자는 몇백 자뿐인데도 파일이 하나라 전체를 받아야 하는 구조로 되어 있었습니다.
+
+> 이를 Pretendard 공식 dynamic subset(글자 범위별 92조각)으로 바꿔 `globals.css`에서 불러오게 했고, 브라우저가 화면에 쓰인 글자가 들어 있는 조각만 받게 되어 화면별 폰트 전송량이 2.0MB에서 0.16~0.42MB로 줄었습니다.
+
+```css
+/* src/app/globals.css */
+@import "tailwindcss";
+/* Pretendard Variable dynamic subset(92조각, unicode-range). */
+@import "./pretendard-dynamic-subset.css";
+
+/* src/app/pretendard-dynamic-subset.css — 이런 블록이 92개 */
+@font-face {
+  font-family: "Pretendard Variable"; /* 92개 모두 같은 이름 → 브라우저는 폰트 하나로 취급 */
+  font-style: normal;
+  font-display: swap;
+  font-weight: 45 920;
+  src: url(/fonts/pretendard/PretendardVariable.subset.0.woff2) format("woff2-variations");
+  unicode-range: /* 이 조각이 맡는 글자 범위 (블록마다 다름) */
+    U+f9ca-fa0b, U+ff03-ff05, U+ff07, U+ff0a-ff0b, U+ff0d-ff19, U+ff1b, U+ff1d, U+ff20-ff5b, U+ff5d,
+    U+ffe0-ffe3, U+ffe5-ffe6;
+}
+```
+
+## 6. 이미지 우선 로드
+
+화면에서 가장 큰 이미지가 다른 이미지들과 똑같이 취급되어 늦게 그려지고 있는 문제도 있었습니다. 원인은 두 가지였는데, 다음과 같습니다.
+
+첫째, Next.js `Image`의 `loading` 기본값이 `lazy`라서, 첫 화면의 대표 이미지도 화면 근처에 있다고 계산된 뒤에야 요청되었습니다.
+
+둘째, 크롬은 이미지를 처음에 낮은 우선순위로 요청하기 때문에, 높은 우선순위로 요청되는 폰트·JS에 회선을 먼저 내줍니다.
+
+> 그래서 화면별 LCP 이미지에만 `loading="eager"`(바로 요청)와 `fetchPriority="high"`(높은 우선순위로 요청)를 줘서, HTML을 받자마자 먼저 요청되게 했습니다. 나머지 이미지는 지연 로딩을 그대로 두었습니다.
+
+```tsx
+<Image
+  src={project.thumbnail ?? project.image}
+  alt=""
+  fill
+  sizes="144px"
+  loading={priority ? "eager" : undefined}      // false면 속성을 주지 않아 기본값(lazy) 유지
+  fetchPriority={priority ? "high" : undefined}
+/>
+
+// 검색 결과 목록에서는 첫 번째 결과만 우선 로드
+{results.projects.map((project, index) => (
+  <ProjectRow key={project.id} project={project} priority={index === 0} />
+))}
+```
+
+## 7. 전체 결과
+
+측정 조건은 프로덕션 빌드, Lighthouse 3회 중앙값이며, 변경 전 코드와 같은 조건에서 비교했습니다. 세 가지 변경(`Suspense` 경계, 폰트 분할, LCP 이미지 우선 로드)을 함께 적용하고 잰 결과라서, 변경별 효과는 따로 측정하지 않았습니다.
+
+- 모바일 FCP: 홈 11.6s → 3.3s (약 72% 감소)
+- 모바일 LCP: 홈 13.6s → 5.1s (약 63%), LIVE 메인 19.5s → 5.1s (약 74%), 상세 17.0s → 8.4s (약 51%)
+- 데스크톱 LCP: 홈 2.4s → 1.1s (약 54%), LIVE 메인 3.4s → 1.0s (약 71%)
+- 폰트 전송량: 화면별 2.0MB → 0.16~0.42MB (약 79~92%)
+
+## 정리
+
+여러 화면이 함께 쓰는 컴포넌트에서 `useSearchParams`처럼 요청 때만 알 수 있는 값을 읽으면, 영향 범위가 페이지 전체로 커질 수 있습니다. 그런 컴포넌트는 바로 바깥을 `Suspense`로 감싸 영향 범위를 그 자리로 고정하고, 개발 서버가 아니라 프로덕션 빌드의 첫 HTML로 확인해야 합니다. 폰트와 이미지도 같은 원리로, 첫 화면에 필요한 것을 먼저 받도록 바꿨습니다.
+
+> 첫 화면에 필요한 것을 먼저, 필요한 만큼만 보냅니다.
