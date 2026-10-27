@@ -1,0 +1,169 @@
+export const info = {
+  tags: ["Network", "스트리밍"],
+  title: "저지연 LIVE 재생과 채팅 재연결",
+  summary:
+    "Amazon IVS 저지연 방송을 IVS Player로 재생하고, 송출 전 404를 송출 대기로 바꾸고, 채팅을 지수 백오프로 재연결하며 영상과 분리한 과정을 정리합니다.",
+  date: "2026.10.27",
+};
+
+라이브 커머스 서비스에서 Amazon IVS로 방송 재생과 채팅을 연결하면서 바꾼 세 가지를 정리합니다. 방송과 다시보기의 재생 방식을 나눈 이유, 송출 전 404를 송출 대기로 바꾼 방법, 채팅을 지수 백오프로 재연결하고 영상과 분리한 방법입니다.
+
+## 1. IVS Player와 hls.js
+
+방송은 타사 플레이어는 저지연 재생을 지원하지 않는다는 아마존 IVS Player의 규칙으로 인해 **아마존 IVS Player로 교체**하였고, 다시보기는 저지연 재생이 필요하지 않기 때문에 **hls.js로 재생**했습니다.
+
+**방송은 IVS Player, 다시보기는 hls.js**
+
+```tsx
+if (!live) playWithoutIvs(element); // 다시보기·쇼츠
+else {
+  // 방송 중일 때만 IVS Player SDK를 불러옴
+  void import("amazon-ivs-player").then((ivs) => {
+    if (cancelled) return;
+    if (!ivs.isPlayerSupported) {
+      playWithoutIvs(element); // WebAssembly가 없는 브라우저는 기존 방식으로
+```
+
+**다시보기 경로**
+
+```tsx
+function playWithoutIvs(target: HTMLVideoElement) {
+  const isHls = /\.m3u8(?:$|[?#])/i.test(src);
+  if (!isHls || target.canPlayType("application/vnd.apple.mpegurl")) {
+    target.src = src; // 브라우저가 HLS를 직접 재생할 수 있으면 그대로
+    return;
+  }
+  // 그렇지 않을 때만 hls.js를 불러옴
+  void import("hls.js").then(({ default: Hls }) => {
+    if (cancelled) return;
+    const instance = new Hls({ enableWorker: true });
+    instance.loadSource(src);
+    instance.attachMedia(target);
+    // ...
+  });
+}
+```
+
+**어느 경로를 쓸지 정한다**
+
+```tsx
+<LivePlayer
+  src={playback.data.playbackUrl}
+  live={!isVod} // 방송 중이면 IVS Player, 다시보기면 hls.js 경로
+  // ...
+/>
+```
+
+## 2. 404 송출 대기
+
+404 송출 대기는 판매자가 판매자 화면에서 라이브 시작 버튼을 누르면 그 방송을 여는 브라우저가 IVS 채널에 목차 파일을 요청하는데, **IVS는 아직 OBS에서 받은 영상이 없어 m3u8 파일을 생성하지 못합니다.** 따라서 404를 뱉고, 이전 코드는 이를 재생 실패로 처리한 뒤 **영상 재생을 다시 요청하지 않아** 송출이 시작돼도 다시 시도 버튼을 눌러야 됐었습니다.
+
+이를 해결하기 위해 **404를 송출 대기로 변경하고, 5초마다 다시 요청**하는 방법으로 해결하였습니다. 재생 요청 전에는 영상을 받지 않는 IVS Player에 **자동 재생을 활성화**해 송출이 시작되면 조작 없이 재생되게 하였습니다.
+
+**수정 전**
+
+```tsx
+player.addEventListener(ivs.PlayerEventType.ERROR, () => {
+  if (!cancelled) setError("영상 재생에 실패했습니다. 다시 시도해 주세요.");
+});
+```
+
+**수정 후**
+
+```tsx
+const STREAM_RETRY_MS = 5_000;
+
+// 송출 대기 안내를 두고 5초 뒤 다시 요청
+function waitForStream(reload: () => void) {
+  setStatus("waiting");
+  retry = setTimeout(() => {
+    if (broadcastEnded()) setStatus("ended");
+    else reload();
+  }, STREAM_RETRY_MS);
+}
+```
+
+**SDK 재생 요청 전에는 영상을 받지 않아 자동 재생 활성화**
+
+```tsx
+// SDK는 재생 요청 전에는 영상을 받지 않아 자동 재생을 켬
+player.setAutoplay(true);
+player.addEventListener(ivs.PlayerEventType.ERROR, (playerError) => {
+  if (cancelled) return;
+  if (playerError.type === ivs.ErrorType.NOT_AVAILABLE && playerError.code === 404) {
+    waitForStream(() => player.load(src)); // 송출 전(404) → 대기 후 재요청
+  } else setError("영상 재생에 실패했습니다. 다시 시도해 주세요.");
+});
+```
+
+**화면을 떠나면 재요청을 멈춤**
+
+```tsx
+return () => {
+  cancelled = true;
+  clearTimeout(retry); // 대기 중인 재요청 취소
+  // ...
+  ivsPlayer.current?.delete();
+};
+```
+
+## 3. 지수 백오프 재연결과 채팅 분리
+
+지수 백오프 재연결은 채팅이 끊길 때마다 **새 토큰을 받아 1초부터 2배씩** 늘어나게 해서 **최종 30초까지** 간격을 늘려 재연결하게 했습니다. 단, **30초가 넘은 연결은 정상 연결로 보고 1초부터 다시** 세게 만들었고, **401, 404, 409**처럼 다시 해도 같은 오류는 **재연결을 멈추게** 했습니다.
+
+**채팅 연결과 영상은 분리**해 채팅 오류는 채팅에서만 처리하게 해, 채팅 연결이 실패해도 영상 재생에 영향이 가지 않도록 구조로 분리했습니다.
+
+**재연결 규칙**
+
+```ts
+// 다시 받아도 같은 결과라 재연결을 멈출 오류: 로그인 만료, 없는 LIVE, 방송 중 아님
+export function stopsReconnect(status: number | undefined) {
+  return status === 401 || status === 404 || status === 409;
+}
+
+// 이만큼 유지되다 끊긴 연결은 정상 종료(세션 60분 만료 등)로 보고 처음부터 셈
+export const STABLE_CONNECTION_MS = 30_000;
+
+// 1초에서 두 배씩 늘려 30초에서 멈춤
+export function nextReconnect(failures: number, openedMs: number) {
+  const streak = openedMs >= STABLE_CONNECTION_MS ? 0 : failures;
+  return { delayMs: Math.min(30_000, 1_000 * 2 ** streak), failures: streak + 1 };
+}
+```
+
+**채팅 연결은 따로**
+
+```tsx
+<RealLiveChatProvider liveId={liveId} replay={replay}>
+  <LiveViewport desktop={<RealBuyerLive /* ... */ desktop />}>
+    <RealBuyerLive /* ... */ />
+  </LiveViewport>
+</RealLiveChatProvider>
+```
+
+**채팅 오류는 채팅 안에서 처리**
+
+```ts
+// 입장 전 채팅 조회가 실패해도 무시하고 실시간 채팅은 계속 (:154-160)
+getVodChat(liveId, 0, HISTORY_RANGE_SEC, historyRequest.signal).then(
+  (messages) => { /* ... */ },
+  () => undefined,
+);
+
+// 전송 실패는 오류를 던지지 않고 결과로 돌려줌 (:185-205)
+const send = (content: string) =>
+  new Promise<SendResult>((resolve) => {
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      resolve("failed");
+      return;
+    }
+    // ...
+    const timeout = setTimeout(() => settle("failed"), SEND_TIMEOUT_MS);
+  });
+```
+
+## 정리
+
+> 방송 중 영상은 저지연 채널이라 IVS Player로, 다시보기는 hls.js로 재생합니다. 송출 전 404는 재생 실패가 아니라 송출 대기로 보고 5초마다 다시 요청하며, 자동 재생으로 송출이 시작되면 조작 없이 재생됩니다. 채팅은 끊길 때마다 새 토큰으로 지수 백오프 재연결하고, 영상과 분리해 채팅 오류가 영상 재생에 번지지 않게 했습니다.
+
