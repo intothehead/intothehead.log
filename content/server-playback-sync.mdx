@@ -1,0 +1,191 @@
+export const info = {
+  tags: ["React", "실시간"],
+  title: "서버가 정한 재생 상태와 사용자 입력 맞추기",
+  summary:
+    "SYFITY에서 명령 경합, Host 연결 상태, 모바일 자동재생 정책, IFrame 기본 컨트롤을 처리해 서버가 정한 재생 상태와 사용자 입력을 맞춘 방법을 정리합니다.",
+  date: "2026.10.28",
+};
+
+SYFITY 서비스에서 재생 상태와 사용자의 입력을 맞추기 위한 작업을 정리합니다. 명령 경합, Host 연결 상태, 모바일 자동재생 정책, IFrame 기본 컨트롤 네 가지입니다.
+
+## 1. 명령 경합
+
+대기 중인 seek와 다른 명령의 경합을 **ref 잠금**으로 막고, 두 제어 경로가 **같은 처리 중 상태**를 사용하게 했습니다. 재생바 이동을 기다리는 동안 또 다른 명령이 들어오거나 MiniPlayer와 유튜브 화면 버튼이 동시에 눌리면 서버에 명령이 겹쳐 보내질 수 있었습니다.
+
+그래서 처리 중인 명령이 있으면 새 명령을 보내지 않도록, **서버 응답 중일 때 들어온 명령은 버릴 수 있게 ref로 잠그고**, **기다리던 seek는 다른 명령이 시작되면 취소**하게 했습니다.
+
+**처리 중이면 새 명령을 버리고, 기다리던 seek는 취소**
+
+```ts
+async function runHostCommand(command: PlayerCommand, action: () => Promise<unknown>) {
+  if (pendingCommandRef.current) return; // 처리 중인 명령이 있으면 새 명령은 버림
+
+  if (command !== "seek" && seekTimeoutRef.current !== null) {
+    window.clearTimeout(seekTimeoutRef.current); // 기다리던 seek 취소
+    seekTimeoutRef.current = null;
+  }
+
+  pendingCommandRef.current = command; // 잠금
+  try {
+    await action(); // 서버로 명령을 보내고 응답을 기다림
+  } finally {
+    pendingCommandRef.current = null; // 해제
+  }
+}
+```
+
+여기서 seek는 재생바 이동을 뜻합니다. 재생바를 끌면 위치가 바뀔 때마다 seek가 수십 번 들어오게 됩니다. 그걸 전부 서버에 보내지 않고, **새 seek가 들어올 때마다 예약을 다시 걸어 마지막 위치 하나만 남기도록** 했습니다. 조건은 손을 떼고 200ms 동안 더 움직이지 않으면 그 하나를 보내는 방식입니다.
+
+**seek는 200ms 뒤로 예약하고, 새 seek가 오면 다시 예약**
+
+```ts
+const SEEK_DEBOUNCE_MS = 200;
+
+function handleSeek(seekTime: number) {
+  if (pendingCommandRef.current) return;
+
+  if (seekTimeoutRef.current !== null) {
+    window.clearTimeout(seekTimeoutRef.current); // 이전 예약을 지우고
+  }
+
+  seekTimeoutRef.current = window.setTimeout(() => { // 마지막 위치로 다시 예약
+    seekTimeoutRef.current = null;
+    void runHostCommand("seek", () => playbackCommands.seek(roomId, seekTime));
+  }, SEEK_DEBOUNCE_MS);
+}
+```
+
+그리고 MiniPlayer와 유튜브 제어 경로를 **똑같이 거치게** 해, 어느 쪽에서 눌러도 명령이 겹치지 않도록 했습니다.
+
+**두 경로 모두 runHostCommand를 거침**
+
+```ts
+// MiniPlayer 버튼
+void runHostCommand("pause", () => playbackCommands.pause(roomId, currentTime));
+
+// 유튜브 화면 버튼(IFrame 상태 변화 이벤트)
+void runHostCommand(command, () => action(roomId, nextCurrentTime));
+```
+
+## 2. Host 연결 상태
+
+Host 연결 상태를 `connected` · `disconnected` · `closed` **판별 유니온**으로 모델링했습니다. 여기서 판별 유니온이란 상태 이름과 그 상태에만 있는 데이터를 한 덩어리로 묶어, 이름만 보면 어떤 데이터가 있는지 확실히 알 수 있게 만든 타입을 뜻합니다. 판별 유니온을 사용하지 않으면 연결됨인데 마감 시각이 있거나 종료인데 이유가 없는 경우가 생길 수 있습니다. 이를 판별 유니온으로 두면 **TypeScript가 이런 값들을 막을 수 있습니다.**
+
+**상태마다 따라오는 데이터가 다름**
+
+```ts
+export type HostConnectionState =
+  | { status: "connected" }                         // 데이터 없음
+  | { status: "disconnected"; waitUntil: string }   // 재접속 마감 시각
+  | { status: "closed"; reason: RoomClosedReason }; // 종료 사유
+```
+
+또 Host가 끊긴 뒤 입장하거나 재접속한 사용자도 현재 상태를 알 수 있도록 **입장 응답에 Host 연결 상태를 붙였습니다.**
+
+**서버: 입장 응답에 Host 연결 상태를 실음**
+
+```ts
+const hostConnection = presenceService.getHostConnectionState(roomId);
+// …
+ack({ success: true, data: { hostConnection, playbackState } });
+```
+
+**웹: 입장 응답으로 Host 연결 상태를 맞춤**
+
+```ts
+socket.emit("room:join", { roomId }, (response) => {
+  if (response.success) {
+    const { hostConnection } = response.data;
+    if (hostConnection.status === "disconnected") {
+      markHostDisconnected(hostConnection.waitUntil);
+    } else {
+      markHostReconnected();
+    }
+  }
+});
+```
+
+## 3. 모바일 자동재생 정책
+
+**탭 이벤트와 같은 호출 스택에서 먼저 재생**하고, 서버 명령이 실패하면 **이전 재생 여부에 맞춰 되돌리게** 했습니다. 모바일 브라우저는 사용자가 누른 그 순간(같은 호출 스택)에 시작된 재생만 허용합니다. 그런데 이전 코드는 버튼을 누르면 서버에 명령을 보내고, 응답이 온 뒤에야 재생했습니다. 그래서 그 사이 서버 왕복이 끼어 모바일에서 막히는 현상이 있었습니다.
+
+**수정 전: 서버 응답이 온 뒤에야 재생**
+
+```ts
+// 서버가 재생 상태를 보내야 그때 플레이어가 재생된다.
+void runHostCommand("play", () => playbackCommands.play(roomId, currentTime));
+```
+
+이를 해결하기 위해 **버튼을 누르자마자 내 플레이어를 먼저 재생하고, 그다음 서버 명령을 보내게** 변경했습니다. 서버 명령이 실패하면 되돌립니다.
+
+**수정 후: 먼저 재생하고, 실패하면 이전 재생 여부에 맞춰 되돌림**
+
+```ts
+function handleSelectTrack(selectedPlaylistItemId: string) {
+  // 탭 이벤트와 같은 호출 스택에서 재생해 모바일 자동재생 정책을 충족한다.
+  playerControllerRef?.current?.play();
+  void runHostCommand(
+    "select",
+    () => playbackCommands.changeTrack(roomId, "select", selectedPlaylistItemId),
+    isPlaying ? undefined : () => playerControllerRef?.current?.pause(), // 실패 시: 멈춰 있었으면 다시 멈춤
+  );
+}
+```
+
+## 4. IFrame 기본 컨트롤
+
+Host가 누르면 Socket 명령으로 서버에 올리고, Member가 누르면 서버에 동기화를 요청해 상태를 서버 상태와 동일하게 맞춥니다. 유튜브 화면 안의 재생·정지 버튼은 코드를 거치지 않고 유튜브가 바로 처리합니다. 그래서 **누른 사람의 화면만 서버 상태와 어긋납니다.**
+
+이를 해결하기 위해 유튜브가 보내는 상태 변화 이벤트를 받아 **서버 상태와 다를 때만 사용자가 누른 것으로** 보게 했습니다. 유튜브 이벤트는 사용자가 누른 변화와 코드가 서버 상태를 적용하면서 만든 변화를 구분하지 않고 똑같이 보내기 때문입니다. 코드가 만든 변화는 서버 상태를 따른 것이라 서버 상태와 같고, 사용자가 누른 변화만 서버 상태와 다릅니다. 이 조건이 없으면 서버 상태를 적용할 때마다 생기는 이벤트까지 사용자 입력으로 보고, Host는 같은 명령을, Member는 불필요한 동기화 요청을 서버로 되돌려 보내게 됩니다.
+
+**서버 상태와 다를 때만 사용자 입력으로 봄**
+
+```ts
+onStateChange: (event) => {
+  const currentPlaybackState = playbackStateRef.current; // 최신 서버 상태
+
+  if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) {
+    const isPlaying = event.data === YT.PlayerState.PLAYING;
+
+    if (isPlaying !== currentPlaybackState.isPlaying) { // 서버 상태와 다를 때만
+      onPlaybackStateChangeRef.current(isPlaying, event.target.getCurrentTime());
+    }
+  }
+},
+```
+
+Host라면 그 변화를 play/pause 명령으로 서버에 올려 방 전체를 바꿉니다. Member라면 서버에 현재 상태를 다시 요청하고, 받은 상태로 자기 플레이어를 서버 상태로 되돌립니다.
+
+**Host는 명령, Member는 동기화 요청**
+
+```ts
+function handlePlaybackStateChange(nextIsPlaying: boolean, nextCurrentTime: number) {
+  if (!isHost) {
+    playbackCommands.requestSync(roomId); // Member: 서버에 현재 상태를 다시 요청
+    return;
+  }
+
+  const command = nextIsPlaying ? "play" : "pause";
+  const action = nextIsPlaying ? playbackCommands.play : playbackCommands.pause;
+  void runHostCommand(command, () => action(roomId, nextCurrentTime)); // Host: 명령으로 서버에 올림
+}
+```
+
+흐름은 다음과 같습니다.
+
+- Host가 유튜브 화면에서 정지를 누르면: 이벤트 PAUSED → 서버와 비교 → 서버 상태(재생 중)와 다름 → pause 명령 → 서버가 방 전체에 정지 상태를 뿌림 → 모두 멈춤
+- Member가 유튜브 화면에서 정지를 누르면: 이벤트 PAUSED → 서버와 비교 → 서버 상태와 다름 → sync-request → 서버가 그 Member에게만 현재 상태(재생 중, 몇 초)를 보냄 → 그 상태로 다시 재생
+
+**서버: pause는 방 전체에, sync-response는 요청한 사람에게만**
+
+```ts
+// playback:pause → 방 전체에 보냄
+io.to(`room:${roomId}`).emit("playback:pause", state);
+
+// playback:sync-request → 요청한 Member에게만 보냄
+socket.emit("playback:sync-response", state);
+```
+
+## 정리
+
+> 처리 중인 명령이 있으면 ref 잠금으로 새 명령을 보내지 않고, 기다리던 seek는 다른 명령이 시작되면 취소하며, MiniPlayer와 유튜브 화면 버튼이 같은 경로를 거치게 했습니다. Host 연결 상태는 판별 유니온으로 모델링하고 입장 응답에 실어, Host가 끊긴 뒤 들어온 사용자도 현재 상태를 알 수 있게 했습니다. 모바일에서는 탭과 같은 호출 스택에서 먼저 재생하고 서버 명령이 실패하면 이전 재생 여부에 맞춰 되돌리며, 유튜브 화면 버튼은 서버 상태와 다를 때만 사용자 입력으로 보고 Host는 명령으로, Member는 동기화 요청으로 처리합니다.
