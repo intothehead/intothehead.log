@@ -1,0 +1,196 @@
+export const info = {
+  tags: ["React", "Hooks"],
+  title: "재생 중 플레이어 재생성과 YouTube 플레이어 수명주기 문제",
+  summary:
+    "재생 중 YouTube 플레이어가 다시 만들어지던 원인(콜백 의존성, 레이아웃 중복)과, 같은 수명주기에서 함께 고친 준비 전 상태 문제를 정리합니다.",
+  date: "2026.10.28",
+};
+
+SYFITY 서비스에서 영상 재생 중 플레이어 재생성이 반복되는 문제가 있었습니다. 원인은 두 가지였고, 같은 플레이어 수명주기에서 함께 고친 문제가 하나 더 있습니다.
+
+## 1. 콜백 의존성
+
+SYFITY는 사용자 간 상태 동기화를 위해 서버가 **10초 간격으로 재생 상태를 플레이 중인 룸에 뿌립니다.**
+
+**서버: 10초마다 방 전체에 재생 상태를 보냄**
+
+```ts
+export const PLAYBACK_TICK_INTERVAL_MS = 10_000;
+
+return setInterval(() => {
+  // …
+  io.to(`room:${roomId}`).emit("playback:tick", state); // 방 전체에 재생 상태를 뿌림
+}, PLAYBACK_TICK_INTERVAL_MS);
+```
+
+이때 그 상태 정보에 맞는 부모(PlayerPanel)가 다시 그려지고, **부모 안에 선언된 콜백 함수들이 다시 생성**되었습니다.
+
+**부모: 다시 그려질 때마다 콜백이 새로 만들어짐**
+
+```tsx
+export function PlayerPanel({ roomId, isHost, playlist }: PlayerPanelProps) {
+  const playbackState = usePlayerStore((state) => state.playbackState); // 서버 상태가 바뀌면 다시 그려짐
+
+  function handleBufferingRecovered() { /* … */ } // 다시 그려질 때마다 새로 만들어짐
+  function handleNextTrack() { /* … */ }
+  function handlePlayerError(errorCode: number) { /* … */ }
+
+  return (
+    <YouTubePlayer
+      playbackState={playbackState}
+      onBufferingRecovered={handleBufferingRecovered}
+      onEnded={isHost ? handleNextTrack : () => undefined}
+      onError={handlePlayerError}
+    />
+  );
+}
+```
+
+화면이 다시 그려졌기 때문에 React는 의존성 검사를 실시하고, 새로 생성된 콜백 함수들은 똑같이 보여도 기존과 다른 함수들이기 때문에 의존성 검사에서 "바뀜"으로 판단합니다. **useEffect에 있는 정리 함수가 실행되면서 플레이어를 부수고, 플레이어를 다시 만들고 영상도 재로드**가 되는 현상입니다.
+
+**수정 전: 콜백이 플레이어 생성 effect의 의존성**
+
+```ts
+useEffect(() => {
+  playerRef.current = new window.YT.Player(containerRef.current, {
+    events: {
+      onError: (event) => onError(Number(event.data)),
+      onStateChange: (event) => {
+        // …
+        if (event.data === window.YT.PlayerState.ENDED) onEnded();
+      },
+    },
+  });
+
+  return () => {
+    playerRef.current?.destroy(); // 정리 함수: 플레이어를 부숨
+  };
+}, [onBufferingRecovered, onEnded, onError]); // 새 콜백이 오면 "바뀜"으로 판단
+```
+
+이 문제를 해결하기 위해 **콜백 함수들을 다시 그려도 상자는 그대로인 useRef를 사용해** 그 안에서 최신 콜백들을 갈아 끼울 수 있게 만들었습니다. 이는 콜백 함수를 직접 실행하는 것이 아닌 useRef 상자를 열어 최신 콜백을 꺼내서 사용하기 때문에 React 의존성 검사에서 바뀜으로 판단하지 않고, **플레이어 생성 effect 의존성도 `[]`로 둘 수 있었습니다.** 비교할 의존성이 없으므로 effect가 다시 실행되지 않습니다.
+
+> effect는 늘 같은 상자를 사용하고, 상자 안의 내용이 바뀌는 것은 React가 의존성으로 추적하지 않습니다.
+
+따라서 부모가 다시 화면에 그려져도 플레이어를 부수지 않게 만들 수 있었습니다.
+
+**수정 후: 최신 콜백은 ref로, 플레이어 생성은 한 번**
+
+```ts
+const onEndedRef = useRef(onEnded);
+const onErrorRef = useRef(onError);
+
+useEffect(() => {
+  onEndedRef.current = onEnded; // 상자 안의 콜백만 최신으로 갈아 끼움
+  onErrorRef.current = onError;
+}, [onEnded, onError]);
+
+useEffect(() => {
+  playerRef.current = new window.YT.Player(containerRef.current, {
+    events: {
+      onError: (event) => onErrorRef.current(Number(event.data)), // 상자를 열어 최신 콜백을 꺼냄
+      onStateChange: (event) => {
+        if (event.data === window.YT.PlayerState.ENDED) onEndedRef.current();
+      },
+    },
+  });
+
+  return () => playerRef.current?.destroy();
+}, []); // 비교할 의존성이 없어 처음 한 번만 실행
+```
+
+## 2. 레이아웃 중복
+
+PC와 모바일 레이아웃을 둘 다 렌더링해 **IFrame이 두 개**였습니다.
+
+**두 레이아웃이 각자 플레이어를 그림**
+
+```tsx
+// RoomDesktopLayout: 넓은 화면(xl 이상)에서만 보임
+<section className="hidden min-h-0 flex-1 overflow-hidden border-b border-border xl:flex">
+  {renderPlayerPanel()} {/* 플레이어 1 */}
+</section>
+
+// RoomMobileLayout: 좁은 화면(xl 미만)에서만 보임
+<section className="flex min-h-0 flex-1 flex-col overflow-hidden xl:hidden">
+  <div className="shrink-0 px-5 py-4">{renderPlayerPanel()}</div> {/* 플레이어 2 */}
+</section>
+```
+
+기존에는 matchMedia로 브라우저에게 화면의 폭을 물어봐 그에 맞는 레이아웃을 그리게 했습니다. 하지만 **서버는 화면 폭을 알 수 없어 서버용 값인 모바일로 그렸고**, PC에서 접속하면 모바일 레이아웃이 잠깐 보였다가 하이드레이션된 뒤 브라우저가 진짜 화면 폭을 알게 되면서 PC 레이아웃으로 변경되었습니다.
+
+**matchMedia로 화면 폭을 물어 한쪽만 그림**
+
+```tsx
+const isDesktop = useSyncExternalStore(
+  subscribeToDesktopViewport,
+  getDesktopViewportSnapshot, // 브라우저: matchMedia로 화면 폭을 물음
+  getServerViewportSnapshot,  // 서버: 화면 폭을 몰라 항상 false(모바일)
+);
+
+{isDesktop ? <RoomDesktopLayout /* … */ /> : <RoomMobileLayout /* … */ />}
+
+function getServerViewportSnapshot() {
+  return false;
+}
+```
+
+이 문제를 해결하기 위해 화면을 브라우저에게 묻는 방식을 철회하고, **두 레이아웃 컴포넌트를 하나로 합쳐 플레이어 칸 자체를 하나로** 두었습니다. PC와 모바일 배치는 각 칸에 CSS로 넣어 뒀습니다. 따라서 IFrame이 하나만 존재하게 돼 레이아웃 중복을 피할 수 있었습니다.
+
+**수정 후: 플레이어 칸은 하나, 배치는 CSS로**
+
+```tsx
+<section className="flex min-h-0 flex-1 flex-col overflow-hidden border-b border-border xl:flex-row">
+  {/* … */}
+  <div className="shrink-0 px-5 py-4 xl:min-w-0 xl:flex-1 xl:self-stretch xl:border-r xl:border-border xl:px-6 xl:py-6">
+    {renderPlayerPanel()} {/* 플레이어는 한 번만 그림 */}
+  </div>
+  {/* … */}
+</section>
+```
+
+## 3. 준비 전 상태
+
+재로드와는 다른 증상이지만, 같은 플레이어 수명주기에서 함께 고친 문제입니다. IFrame이 준비되기 전에 도착한 서버의 상태가 버려지면서 **사용자가 방에 입장한 직후 플레이어에 적용되지 않았습니다.**
+
+**수정 전: 준비되면 볼륨만 적용하고, 플레이어가 없으면 그냥 끝**
+
+```ts
+onReady: (event) => {
+  applyPlayerVolume(event.target, usePlayerVolumeStore.getState()); // 준비되면 볼륨만 적용
+},
+
+useEffect(() => {
+  const player = playerRef.current;
+  if (!player || !playbackState?.videoId) return; // 플레이어가 아직 없으면 그냥 끝
+  // 영상 불러오기 · 위치 보정 · 재생/정지
+}, [playbackState]); // 서버 상태가 "바뀔 때"만 다시 실행
+```
+
+그래서 **준비 여부를 ref를 이용해서 담아 놓고 준비 전에는 명령을 보내지 않게** 했습니다. **서버 상태도 ref에 담고** 플레이어가 onReady가 되면, 꺼내서 적용하는 방식으로 수정했습니다.
+
+**수정 후: 준비 여부와 최신 서버 상태를 ref에 담고, onReady에서 적용**
+
+```ts
+const isPlayerReadyRef = useRef(false);
+const playbackStateRef = useRef(playbackState);
+
+useEffect(() => {
+  playbackStateRef.current = playbackState; // 최신 서버 상태 보관
+}, [playbackState]);
+
+onReady: (event) => {
+  isPlayerReadyRef.current = true;
+  applyPlaybackState(event.target, playbackStateRef.current, loadedVideoIdRef); // 준비되면 최신 상태 적용
+},
+
+useEffect(() => {
+  const player = playerRef.current;
+  if (!player || !isPlayerReadyRef.current) return; // 준비 전에는 명령을 보내지 않음
+  applyPlaybackState(player, playbackState, loadedVideoIdRef);
+}, [playbackState]);
+```
+
+## 정리
+
+> 서버가 10초마다 보내는 재생 상태로 부모가 다시 그려질 때마다 새 콜백이 플레이어 생성 effect를 다시 실행시켰고, useRef로 최신 콜백을 꺼내 쓰게 해 의존성을 `[]`로 두고 플레이어를 부수지 않게 했습니다. PC·모바일 레이아웃 컴포넌트를 하나로 합쳐 IFrame을 하나만 두고 배치는 CSS로 나눴습니다. 준비 전에 도착한 서버 상태는 준비 여부와 함께 ref에 담아 두었다가 onReady에서 적용했습니다.
