@@ -1,0 +1,71 @@
+.Wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.Box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 240px;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  border: 1px dashed var(--border-default);
+  border-radius: 8px;
+  background-color: var(--bg-surface);
+  cursor: pointer;
+}
+
+.Box:hover {
+  border-color: var(--accent-default);
+  background-color: var(--bg-hover);
+}
+
+.Box:has(+ .FileInput:focus-visible) {
+  border-color: var(--accent-default);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.Placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.Placeholder small {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.Preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.FileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.ClearButton {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ClearButton:hover {
+  background-color: var(--bg-hover);
+}

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Tiptap from "@/components/Tiptap";
 import WriteForm from "@/components/WriteForm";
+import ThumbnailInput from "@/components/ThumbnailInput";
 import styles from "./page.module.css";
 
 const repoContentsUrl =
@@ -44,6 +45,38 @@ export default function WritePage() {
       timeZone: "Asia/Seoul",
     });
     const dotDate = date.replaceAll("-", ".");
+    let thumbnailLine = "";
+    const thumbnail = formData.get("thumbnail");
+    if (thumbnail instanceof File && thumbnail.size > 0) {
+      const thumbnailType = thumbnail.type.match(
+        /^image\/(png|jpeg|gif|webp)$/,
+      );
+      if (!thumbnailType) {
+        return { message: "썸네일은 png, jpg, gif, webp만 올릴 수 있어요." };
+      }
+      const extension = thumbnailType[1] === "jpeg" ? "jpg" : thumbnailType[1];
+      const thumbnailPath = `images/posts/${id}/thumbnail.${extension}`;
+      const thumbnailResponse = await fetch(
+        `${repoContentsUrl}/public/${thumbnailPath}`,
+        {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({
+            message: `썸네일 추가: ${thumbnailPath}`,
+            content: Buffer.from(await thumbnail.arrayBuffer()).toString(
+              "base64",
+            ),
+            branch: "main",
+          }),
+        },
+      );
+      if (!thumbnailResponse.ok) {
+        return {
+          message: `썸네일을 올리지 못했어요. (${thumbnailResponse.status})`,
+        };
+      }
+      thumbnailLine = `\n  thumbnail: "/${thumbnailPath}",`;
+    }
     let body = String(content);
     const images = [
       ...body.matchAll(/!\[([^\]]*)\]\(data:image\/(\w+);base64,([^)]+)\)/g),
@@ -71,7 +104,7 @@ export default function WritePage() {
       }
       body = body.replace(markdown, () => `![${alt}](/${imagePath})`);
     }
-    const mdx = `export const info = {
+    const mdx = `export const info = {${thumbnailLine}
   title: "${title}",
   summary: "${summary}",
   tags: ${tagsText},
@@ -142,6 +175,10 @@ ${body}
               className={styles.Input}
             />
           </div>
+        </div>
+        <div className={styles.Field}>
+          <span className={styles.Label}>썸네일 (선택)</span>
+          <ThumbnailInput />
         </div>
         <div className={styles.Field}>
           <span className={styles.Label}>본문</span>
