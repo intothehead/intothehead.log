@@ -1,9 +1,9 @@
 import PostCard from "@/components/PostCard";
 import styles from "./page.module.css";
-import Link from "next/link";
 import Image from "next/image";
 import { getPosts } from "@/data/getPosts";
 import Lamp from "@/components/Lamp";
+import RollingLink from "@/components/RollingLink";
 
 export default async function Home() {
   const posts = await getPosts();
@@ -50,9 +50,11 @@ export default async function Home() {
           />
         ))}
       </div>
-      <Link href="/posts" className={styles.AllPosts}>
-        전체 글 보기 →
-      </Link>
+      <RollingLink
+        href="/posts"
+        text="전체 글 보기 →"
+        className={styles.AllPosts}
+      />
     </main>
   );
 }

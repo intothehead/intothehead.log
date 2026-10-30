@@ -1,6 +1,7 @@
 import styles from "./Header.module.css";
 import Link from "next/link";
 import ThemeButton from "@/components/ThemeButton";
+import RollingLink from "@/components/RollingLink";
 
 export default function Header() {
   return (
@@ -12,9 +13,11 @@ export default function Header() {
         </Link>
         <div className={styles.Headerbox}>
           <nav className={styles.Nav}>
-            <Link href="/posts" className={styles.Headerallposts}>
-              전체글
-            </Link>
+            <RollingLink
+              href="/posts"
+              text="전체글"
+              className={styles.Headerallposts}
+            />
             <Link href="/write" className={styles.Write} aria-label="글쓰기">
               <svg
                 width="20"

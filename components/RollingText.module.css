@@ -1,0 +1,30 @@
+.Text {
+  display: inline-flex;
+}
+
+.Hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.Letter {
+  display: inline-block;
+  height: 1lh;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.Track {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Track {
+    transform: none !important;
+  }
+}
