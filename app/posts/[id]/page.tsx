@@ -46,6 +46,8 @@ export default async function PostDetail({ params }: PostDetailProps) {
           alt=""
           width={720}
           height={360}
+          sizes="(max-width: 760px) 100vw, 720px"
+          quality={90}
           className={styles.ThumbnailImage}
         />
       ) : (

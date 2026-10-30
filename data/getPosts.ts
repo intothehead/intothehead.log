@@ -8,6 +8,7 @@ const tagThumbnails: Record<string, string> = {
   html: "/images/thumbnails/html.webp",
   css: "/images/thumbnails/css.webp",
   browser: "/images/thumbnails/browser.webp",
+  network: "/images/thumbnails/network.webp",
 };
 
 function getTagThumbnail(tags: string[]) {

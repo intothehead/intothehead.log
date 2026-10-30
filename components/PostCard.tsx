@@ -29,6 +29,8 @@ export default function PostCard({
               alt=""
               width={360}
               height={200}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+              quality={90}
               className={styles.ThumbnailImage}
             />
           ) : (

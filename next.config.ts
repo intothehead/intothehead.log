@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  images: {
+    qualities: [75, 90],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "4mb",
