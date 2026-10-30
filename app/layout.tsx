@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Noto_Sans_KR } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
-const notoSans = Noto_Sans_KR({
-  weight: ["400", "500", "700"],
-  subsets: ["latin"],
+const kakaoBig = localFont({
+  src: [
+    { path: "./fonts/KakaoBigSans-Regular.woff2", weight: "400" },
+    { path: "./fonts/KakaoBigSans-Bold.woff2", weight: "700" },
+  ],
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -36,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         ></script>
       </head>
-      <body className={`${notoSans.className} ${jetbrainsMono.variable}`}>
+      <body className={`${kakaoBig.className} ${jetbrainsMono.variable}`}>
         <Header />
         {children}
         <Footer />
