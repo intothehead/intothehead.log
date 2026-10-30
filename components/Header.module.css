@@ -41,6 +41,11 @@
   color: var(--text-primary);
 }
 
+.Write {
+  display: flex;
+  color: var(--text-primary);
+}
+
 .Headerbox {
   display: flex;
   align-items: center;

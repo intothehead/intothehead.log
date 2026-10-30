@@ -15,6 +15,31 @@ export default function Header() {
             <Link href="/posts" className={styles.Headerallposts}>
               전체글
             </Link>
+            <Link href="/write" className={styles.Write} aria-label="글쓰기">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  stroke="currentColor"
+                />
+                <path
+                  d="m15 5 4 4"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  stroke="currentColor"
+                />
+              </svg>
+            </Link>
             <a
               className={styles.Github}
               href="https://github.com/intothehead"

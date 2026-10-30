@@ -10,6 +10,7 @@
   --bg-code: #24292e;
   --border-code: #30363d;
   --bg-hover: #fff7f9;
+  --bg-mark: #ffdbe3;
 }
 
 [data-theme="dark"] {
@@ -21,6 +22,7 @@
   --bg-default: #171214;
   --bg-surface: #211a1d;
   --bg-hover: #211a1d;
+  --bg-mark: #5c2333;
 }
 
 body {

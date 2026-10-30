@@ -1,0 +1,122 @@
+.Page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 72px 20px 96px;
+}
+
+@media (max-width: 640px) {
+  .Page {
+    padding-top: 40px;
+    gap: 24px;
+  }
+}
+
+.Heading {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -1px;
+}
+
+.Form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.Row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .Row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.Field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.Label {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.Input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+}
+
+.Input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.Input:focus {
+  outline: none;
+  border-color: var(--accent-default);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.TitleInput {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.Submit {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-default);
+}
+
+.PasswordField {
+  width: 220px;
+}
+
+@media (max-width: 640px) {
+  .Submit {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .PasswordField {
+    width: auto;
+  }
+}
+
+.SubmitButton {
+  height: 40px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--accent-default);
+  color: var(--text-on-accent);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.SubmitButton:hover {
+  opacity: 0.9;
+}

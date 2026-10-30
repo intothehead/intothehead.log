@@ -1,9 +1,11 @@
 import { getPosts } from "@/data/getPosts";
 import { notFound } from "next/navigation";
 import styles from "./page.module.css";
+import contentStyles from "@/components/PostContent.module.css";
 import Image from "next/image";
 import Link from "next/link";
 import Comments from "@/components/Comments";
+import CodeBlock from "@/components/CodeBlock";
 
 type PostDetailProps = {
   params: Promise<{ id: string }>;
@@ -51,8 +53,8 @@ export default async function PostDetail({ params }: PostDetailProps) {
           <span className={styles.Blogname}>intothehead.log</span>
         </div>
       )}
-      <div className={styles.Content}>
-        <PostBody />
+      <div className={contentStyles.Content}>
+        <PostBody components={{ pre: CodeBlock }} />
       </div>
       <div className={styles.PostFooter}>
         <Link href="/posts" className={styles.BackLink}>

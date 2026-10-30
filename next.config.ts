@@ -6,10 +6,16 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "4mb",
+    },
+  },
 };
 
 const withMDX = createMDX({
   options: {
+    remarkPlugins: ["remark-gfm"],
     rehypePlugins: [["rehype-pretty-code", { theme: "github-dark" }]],
   },
 });

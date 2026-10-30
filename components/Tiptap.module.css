@@ -1,0 +1,76 @@
+.Editor {
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background-color: var(--bg-surface);
+}
+
+.Toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.ToolbarButton,
+.LanguageSelect {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.ToolbarButton:hover,
+.LanguageSelect:hover {
+  background-color: var(--bg-hover);
+}
+
+.LanguageSelect {
+  border-color: var(--border-default);
+}
+
+.Divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background-color: var(--border-default);
+}
+
+.Body {
+  min-height: 560px;
+  padding: 32px 40px;
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .Body {
+    min-height: 400px;
+    padding: 20px;
+  }
+}
+
+.Editor .Body pre {
+  padding: 16px 24px;
+  color: #e1e4e8;
+}
+
+.Editor .Body pre::before {
+  content: none;
+}
+
+.Editor .Body img {
+  align-self: center;
+}
+
+.Editor .Body :global(.ProseMirror-selectednode) {
+  outline: 2px solid var(--accent-default);
+}
+
+.Editor .Body :global(.selectedCell) {
+  background-color: var(--accent-subtle);
+}
