@@ -31,6 +31,7 @@ export default function PostCard({
               height={200}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
               quality={90}
+              unoptimized={thumbnail.startsWith("/images/topic-thumbnails/")}
               className={styles.ThumbnailImage}
             />
           ) : (

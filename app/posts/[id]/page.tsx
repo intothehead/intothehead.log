@@ -48,6 +48,7 @@ export default async function PostDetail({ params }: PostDetailProps) {
           height={360}
           sizes="(max-width: 760px) 100vw, 720px"
           quality={90}
+          unoptimized={post.thumbnail.startsWith("/images/topic-thumbnails/")}
           className={styles.ThumbnailImage}
         />
       ) : (
