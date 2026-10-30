@@ -2,13 +2,13 @@ import fs from "node:fs";
 import type { Post } from "@/data/posts";
 
 const tagThumbnails: Record<string, string> = {
-  javascript: "/images/thumbnails/javascript.webp",
-  react: "/images/thumbnails/react.webp",
-  "next.js": "/images/thumbnails/nextjs.webp",
-  html: "/images/thumbnails/html.webp",
-  css: "/images/thumbnails/css.webp",
-  browser: "/images/thumbnails/browser.webp",
-  network: "/images/thumbnails/network.webp",
+  javascript: "/images/topic-thumbnails/javascript.webp",
+  react: "/images/topic-thumbnails/react.webp",
+  "next.js": "/images/topic-thumbnails/nextjs.webp",
+  html: "/images/topic-thumbnails/html.webp",
+  css: "/images/topic-thumbnails/css.webp",
+  browser: "/images/topic-thumbnails/browser.webp",
+  network: "/images/topic-thumbnails/network.webp",
 };
 
 function getTagThumbnail(tags: string[]) {
