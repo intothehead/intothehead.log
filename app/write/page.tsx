@@ -18,6 +18,15 @@ export default function WritePage() {
     const tagList = tags.split(",");
     const tagsText = JSON.stringify(tagList);
     const id = formData.get("id");
+    if (
+      typeof id !== "string" ||
+      typeof title !== "string" ||
+      !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id) ||
+      !title.trim()
+    ) {
+      console.log("id나 제목이 올바르지 않아요");
+      return;
+    }
     const date = new Date().toLocaleDateString("en-CA", {
       timeZone: "Asia/Seoul",
     });
@@ -78,6 +87,7 @@ ${body}
           <input
             id="title"
             name="title"
+            required
             className={`${styles.Input} ${styles.TitleInput}`}
           />
         </div>
@@ -95,6 +105,9 @@ ${body}
             <input
               id="id"
               name="id"
+              required
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              title="영어 소문자, 숫자, -만 쓸 수 있어요"
               placeholder="react-use-effect"
               className={styles.Input}
             />
