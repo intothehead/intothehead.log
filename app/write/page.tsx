@@ -1,15 +1,20 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import Tiptap from "@/components/Tiptap";
+import WriteForm from "@/components/WriteForm";
 import styles from "./page.module.css";
+
+const repoContentsUrl =
+  "https://api.github.com/repos/intothehead/intothehead.log/contents";
 
 export default function WritePage() {
   async function savePost(formData: FormData) {
     "use server";
     const password = formData.get("password");
     if (password !== process.env.WRITE_PASSWORD) {
-      console.log("비밀번호가 틀렸어요");
-      return;
+      return { message: "비밀번호가 틀렸어요." };
     }
+    const headers = { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` };
 
     const title = formData.get("title");
     const content = formData.get("content");
@@ -24,8 +29,16 @@ export default function WritePage() {
       !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id) ||
       !title.trim()
     ) {
-      console.log("id나 제목이 올바르지 않아요");
-      return;
+      return { message: "id나 제목을 확인해 주세요." };
+    }
+    const existing = await fetch(`${repoContentsUrl}/content/${id}.mdx`, {
+      headers,
+      cache: "no-store",
+    });
+    if (existing.ok) {
+      return {
+        message: `이미 "${id}" id로 올린 글이 있어요. 다른 id를 써 주세요.`,
+      };
     }
     const date = new Date().toLocaleDateString("en-CA", {
       timeZone: "Asia/Seoul",
@@ -40,10 +53,10 @@ export default function WritePage() {
       const extension = type === "jpeg" ? "jpg" : type;
       const imagePath = `images/posts/${id}/${index + 1}.${extension}`;
       const imageResponse = await fetch(
-        `https://api.github.com/repos/intothehead/intothehead.log/contents/public/${imagePath}`,
+        `${repoContentsUrl}/public/${imagePath}`,
         {
           method: "PUT",
-          headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` },
+          headers,
           body: JSON.stringify({
             message: `이미지 추가: ${imagePath}`,
             content: data,
@@ -51,7 +64,11 @@ export default function WritePage() {
           }),
         },
       );
-      console.log(imageResponse.status);
+      if (!imageResponse.ok) {
+        return {
+          message: `이미지를 올리지 못했어요. (${imageResponse.status})`,
+        };
+      }
       body = body.replace(markdown, () => `![${alt}](/${imagePath})`);
     }
     const mdx = `export const info = {
@@ -64,22 +81,24 @@ export default function WritePage() {
 ${body}
 `;
     const baseContent = Buffer.from(mdx).toString("base64");
-    const url = `https://api.github.com/repos/intothehead/intothehead.log/contents/content/${id}.mdx`;
-    const response = await fetch(url, {
+    const response = await fetch(`${repoContentsUrl}/content/${id}.mdx`, {
       method: "PUT",
-      headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` },
+      headers,
       body: JSON.stringify({
         message: `글 추가: ${title}`,
         content: baseContent,
         branch: "main",
       }),
     });
-    console.log(response.status);
+    if (!response.ok) {
+      return { message: `글을 올리지 못했어요. (${response.status})` };
+    }
+    redirect("/");
   }
   return (
     <main className={styles.Page}>
       <h1 className={styles.Heading}>관리자 새 글 쓰기</h1>
-      <form action={savePost} className={styles.Form}>
+      <WriteForm action={savePost} className={styles.Form}>
         <div className={styles.Field}>
           <label htmlFor="title" className={styles.Label}>
             제목
@@ -146,7 +165,7 @@ ${body}
             보내기
           </button>
         </div>
-      </form>
+      </WriteForm>
     </main>
   );
 }

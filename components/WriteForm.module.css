@@ -1,0 +1,7 @@
+.Fieldset {
+  display: contents;
+}
+
+.Fieldset:disabled {
+  cursor: wait;
+}
